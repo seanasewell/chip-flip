@@ -11,8 +11,12 @@
     "ios": {
       "bundleIdentifier": "com.studiosewell.chipflip",
       "supportsTablet": false,
-      "config": { "usesNonExemptEncryption": false },
-      "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.studiosewell.chipflip",
@@ -22,7 +26,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -31,8 +37,22 @@
     },
     "plugins": [
       "expo-router",
-      ["expo-splash-screen", { "backgroundColor": "#F3F1EA", "image": "./assets/images/splash-icon.png", "imageWidth": 220 }],
-      ["expo-audio", { "microphonePermission": false, "recordAudioAndroid": false }]
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F3F1EA",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 220
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
