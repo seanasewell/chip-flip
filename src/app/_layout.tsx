@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { game } from '@/lib/game';
 import { hydrate } from '@/lib/kv';
 import { profile } from '@/lib/profile';
+import { progress } from '@/lib/progress';
 import { initSound } from '@/ui/sound';
 import { C } from '@/ui/theme';
 
@@ -31,6 +32,7 @@ export default function RootLayout() {
   useEffect(() => {
     hydrate()
       .then(() => {
+        progress.load();
         profile.load();
         game.load();
         initSound();

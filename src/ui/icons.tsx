@@ -3,7 +3,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { C } from './theme';
 
-export type IconName = 'menu' | 'sound' | 'mute' | 'arrow' | 'back' | 'eye' | 'floppy' | 'hourglass' | 'smiley' | 'settings' | 'close' | 'book' | 'door' | 'flag' | 'music' | 'check';
+export type IconName = 'menu' | 'sound' | 'mute' | 'arrow' | 'back' | 'eye' | 'floppy' | 'hourglass' | 'smiley' | 'settings' | 'close' | 'book' | 'door' | 'flag' | 'music' | 'check' | 'trophy';
 
 export function Icon({ name, size = 22, color = C.ink, stroke = 2.2 }: { name: IconName; size?: number; color?: string; stroke?: number }) {
   const p = { stroke: color, strokeWidth: stroke, fill: 'none', strokeLinecap: 'square' as const, strokeLinejoin: 'miter' as const };
@@ -59,6 +59,7 @@ export function Icon({ name, size = 22, color = C.ink, stroke = 2.2 }: { name: I
       );
       break;
     case 'flag': body = <Path d="M5 21V3M5 4h12l-2.5 4L17 12H5" {...p} />; break;
+    case 'trophy': body = <Path d="M7 3h10v6a5 5 0 0 1-10 0ZM7 5H3v2a4 4 0 0 0 4 4M17 5h4v2a4 4 0 0 1-4 4M12 14v4M8 21h8M9 18h6" {...p} />; break;
     case 'music': body = <Path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" {...p} />; break;
   }
   return (

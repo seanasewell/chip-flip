@@ -22,7 +22,10 @@ Scan the QR code with the iPhone camera to open the app in Expo Go. To pick up l
 - Results, a local record (wins and streaks for ranked matches) and a saved match you can resume.
 - Music, sound effects and haptics, each with its own setting.
 
-Not yet: accounts and sign-in, online play, profile, ranks, achievements, ads and purchases.
+- Tabs like the web prototype: Play, Ranks (live leaderboard from the server), Rewards (daily and weekly challenges, achievements) and Profile (level, XP, daily streak, stats), with Settings behind the gear.
+- Guest accounts on Supabase (project `chip-flip`): ranked results, streaks and the hidden rating are kept on the server. Migrations are in `supabase/migrations/`.
+
+Not yet: sign in with Apple or Google, online play, friends, ads and purchases.
 
 ## Code
 

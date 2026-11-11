@@ -6,7 +6,9 @@ import { MODES } from '@/core/board';
 import { seatById, sequenceCount, toWin } from '@/core/engine';
 import type { Seat } from '@/core/types';
 import { game, useGame } from '@/lib/game';
-import { useProfile } from '@/lib/profile';
+import { levelOf, progress } from '@/lib/progress';
+import { useEffect, useState } from 'react';
+import { LevelBadge } from './LevelBadge';
 import { Button, Card, Display, Label, Paper, T } from './kit';
 import { Avatar, Pips, SeatAvatar } from './Players';
 import { C, F, sideColor } from './theme';
@@ -15,7 +17,9 @@ const nameOf = (s: Seat) => (s.kind === 'you' ? 'You' : s.name);
 
 export function Results() {
   const g = useGame();
-  const { record } = useProfile();
+  // What this match earned (ranked only), kept for this screen.
+  const [earned] = useState(() => progress.get().last);
+  useEffect(() => () => progress.clearLast(), []);
   const insets = useSafeAreaInsets();
   const m = g.match!;
   const casual = !!g.config?.casual;
@@ -81,13 +85,27 @@ export function Results() {
                 </>
               ) : (
                 <>
-                  <Label style={{ fontSize: 9.5, opacity: 0.7 }}>Win streak</Label>
-                  <Display size={22} style={{ color: C.blue }}>{record.streak}</Display>
+                  <Label style={{ fontSize: 9.5, opacity: 0.7 }}>XP earned</Label>
+                  <Display size={24} style={{ color: C.blue }}>+{earned ? earned.xpTo - earned.xpFrom : 0}</Display>
                 </>
               )}
             </View>
           </Card>
         </View>
+
+        {!casual && earned && levelOf(earned.xpFrom).level !== levelOf(earned.xpTo).level && (
+          <Animated.View entering={ZoomIn.delay(500).springify()} style={{ marginTop: 16 }}>
+            <Card shadow={C.green} bg={C.ink}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+                <LevelBadge level={levelOf(earned.xpTo).level} size={46} />
+                <View style={{ flex: 1 }}>
+                  <Display size={22} style={{ color: C.paper }}>Level up!</Display>
+                  <T style={{ color: 'rgba(255,253,246,0.75)', fontSize: 13 }}>You’re now level {levelOf(earned.xpTo).level} · {levelOf(earned.xpTo).title}</T>
+                </View>
+              </View>
+            </Card>
+          </Animated.View>
+        )}
 
         <View style={{ marginTop: 20, gap: 8 }}>
           {standings.map((s, i) => {
@@ -112,6 +130,22 @@ export function Results() {
             );
           })}
         </View>
+        {!casual && earned && earned.achievements.length + earned.challenges.length > 0 && (
+          <View style={{ marginTop: 20, gap: 8 }}>
+            <Label>Unlocked</Label>
+            {[...earned.achievements, ...earned.challenges].map((a, i) => (
+              <Animated.View key={`${a.name}-${i}`} entering={FadeInDown.delay(400 + i * 90)}>
+                <Card offset={3}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 10 }}>
+                    <T style={{ fontSize: 22 }}>{a.emoji}</T>
+                    <T numberOfLines={1} style={{ flex: 1, fontFamily: F.bodyBold }}>{a.name}</T>
+                    <T style={{ fontFamily: F.bodyBold, fontSize: 12.5, color: C.pink }}>+{a.xp} XP</T>
+                  </View>
+                </Card>
+              </Animated.View>
+            ))}
+          </View>
+        )}
       </ScrollView>
       <View style={{ borderTopWidth: 2, borderColor: C.ink, backgroundColor: C.paper, paddingHorizontal: 14, paddingTop: 14, paddingBottom: insets.bottom + 12, gap: 10 }}>
         <View style={{ maxWidth: 480, width: '100%', alignSelf: 'center', gap: 10 }}>

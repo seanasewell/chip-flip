@@ -7,7 +7,7 @@ import { useSyncExternalStore } from 'react';
 import { AccessibilityInfo } from 'react-native';
 
 import { chooseAction, chooseBySkill } from '@/core/ai';
-import { MODES, isRemoveJack } from '@/core/board';
+import { MODES, isRemoveJack, isWildJack } from '@/core/board';
 import { canSwap, createMatch, currentSeatId, forfeit, play, seatById, sequenceCount, targetsFor } from '@/core/engine';
 import { randomSeed } from '@/core/rng';
 import type { Action, CardId, Difficulty, GameModeId, MatchState, Seat, Sequence } from '@/core/types';
@@ -15,6 +15,7 @@ import { gameMusic, haptic, sfx } from '@/ui/sound';
 import { SIDE_COLORS, validColors } from '@/ui/theme';
 import { kv } from './kv';
 import { profile } from './profile';
+import { progress, type MatchSummary } from './progress';
 import { START_RATING, RATING_FLOOR, nextRating, opponentRating, ratingToSkill } from './skill';
 
 export interface SeatSetup {
@@ -55,6 +56,8 @@ interface Saved {
   config: SetupConfig;
   recorded: boolean;
   youPlaced: boolean;
+  /** Time actually spent playing (not left in the background). */
+  activeMs?: number;
 }
 
 // A new sequence's chips flip one by one (120ms + 220ms each, 1.1s flip),
@@ -170,7 +173,9 @@ class GameController {
     const ranked = !config.casual && config.seats.every((s) => s.kind !== 'local');
     if (!ranked && !config.casual) config = { ...config, casual: true };
     const me = getRating();
-    const opp = ranked ? opponentRating(me) : 0;
+    // Ranked opponents come from the server's hidden rating when connected.
+    const fromServer = ranked ? profile.takeOpponent() : null;
+    const opp = ranked ? (fromServer?.opp ?? opponentRating(me)) : 0;
     const seats = buildSeats(config, ranked ? opp : null);
     const base = createMatch({ mode: config.mode, seats, seed: randomSeed() });
     const colors = validColors(config.colors, MODES[config.mode].sides);
@@ -180,6 +185,7 @@ class GameController {
       rated: ranked ? { me, opp } : undefined,
       sides: base.sides.map((s) => (MODES[config.mode].teams ? { ...s, name: `Team ${SIDE_COLORS[colors[s.index]].name.toLowerCase()}` } : s)),
     };
+    match.id = `${Date.now().toString(36)}${match.id}`;
     this.saved = { match, config, recorded: false, youPlaced: false };
     this.persist();
     this.clearTimers();
@@ -402,8 +408,12 @@ class GameController {
     const m = s.match;
     const you = m.seats.find((x) => x.kind === 'you')!;
     const won = m.winnerSide === you.side;
-    profile.record(won, sequenceCount(m, you.side));
-    if (m.rated) kv.set(RATING_KEY, String(Math.round(Math.max(RATING_FLOOR, nextRating(getRating(), m.rated.opp, won)))));
+    const forfeited = m.forfeitedBy === you.id;
+    const summary = summarize(m, s.activeMs ?? 0);
+    progress.match(summary);
+    profile.recordRanked({ matchId: m.id, mode: m.mode, won, forfeit: forfeited, sequences: sequenceCount(m, you.side), opp: m.rated?.opp ?? START_RATING });
+    // Offline fallback rating (the server keeps its own).
+    if (m.rated) kv.set(RATING_KEY, String(Math.round(Math.max(RATING_FLOOR, nextRating(getRating(), m.rated.opp, won && !forfeited)))));
   }
 }
 
@@ -451,4 +461,27 @@ export const game = new GameController();
 
 export function useGame(): GameState {
   return useSyncExternalStore(game.subscribe, game.get, game.get);
+}
+
+export function summarize(m: MatchState, activeMs: number): MatchSummary {
+  const you = m.seats.find((s) => s.kind === 'you')!;
+  const mine = you.side;
+  const won = m.winnerSide === mine && m.forfeitedBy !== you.id;
+  const mySeqs = m.sequences.filter((q) => q.side === mine);
+  const first = m.sequences[0];
+  const myMoves = m.moves.filter((x) => x.seat === you.id);
+  return {
+    matchId: m.id,
+    mode: m.mode,
+    won,
+    forfeit: m.forfeitedBy === you.id,
+    sequences: mySeqs.length,
+    diagonals: mySeqs.filter((q) => q.dir === 'diag' || q.dir === 'anti').length,
+    wildJacks: myMoves.filter((x) => x.action.kind === 'place' && isWildJack(x.action.card)).length,
+    removals: myMoves.filter((x) => x.action.kind === 'remove').length,
+    shutout: won && m.sequences.every((q) => q.side === mine),
+    comeback: won && !!first && first.side !== mine,
+    durationMs: activeMs || (m.endedAt ?? Date.now()) - m.startedAt,
+    sides: m.sides.length,
+  };
 }
