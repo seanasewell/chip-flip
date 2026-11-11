@@ -1,0 +1,149 @@
+/* Lineup tactile buttons. Lit from the upper left; they sink 2px when
+   pressed. Variants: primary, secondary, reward, danger. */
+:root {
+  /* Lineup brand */
+  --lu-blue: #ff7a45; /* primary action: tangerine */
+  --lu-blue-hi: #ffa477;
+  --lu-blue-lo: #ec5a24;
+  --lu-blue-edge: #a63a10;
+  --lu-orange: #ffc23d; /* reward: sun gold */
+  --lu-orange-hi: #ffdc85;
+  --lu-orange-lo: #f0a414;
+  --lu-orange-edge: #a86c00;
+  --lu-red: #e5484d;
+  --lu-red-lo: #b8343a;
+  --lu-red-edge: #7d2227;
+  --lu-line: rgba(46, 196, 214, 0.3);
+  --lu-press: 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --------------------------------------------------- tier 3: buttons */
+.lu-btn {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  transform: translateY(0);
+  transition:
+    transform var(--lu-press),
+    box-shadow var(--lu-press),
+    filter var(--lu-press),
+    opacity var(--lu-press);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.lu-btn::after {
+  /* glossy reflection on the upper half */
+  content: "";
+  position: absolute;
+  inset: 1px 1px 50% 1px;
+  border-radius: inherit;
+  border-bottom-left-radius: 40% 30%;
+  border-bottom-right-radius: 40% 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.04));
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity var(--lu-press);
+}
+.lu-btn:active:not(:disabled) {
+  transform: translateY(2px);
+}
+.lu-btn:active:not(:disabled)::after {
+  opacity: 0.55;
+}
+.lu-btn:disabled {
+  cursor: default;
+  filter: saturate(0.35) brightness(0.8);
+  opacity: 0.7;
+}
+.lu-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 2px;
+}
+
+.lu-btn-primary {
+  background: linear-gradient(180deg, var(--lu-blue-hi) 0%, var(--lu-blue) 45%, var(--lu-blue-lo) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.12),
+    0 4px 0 var(--lu-blue-edge),
+    0 10px 20px -8px rgba(255, 122, 69, 0.6);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+.lu-btn-primary:active:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 0 var(--lu-blue-edge),
+    0 5px 12px -6px rgba(255, 122, 69, 0.5);
+}
+
+.lu-btn-secondary {
+  background: linear-gradient(180deg, #1a4a50 0%, #123539 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(46, 196, 214, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    0 3px 0 #061517,
+    0 8px 16px -10px rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.94);
+}
+.lu-btn-secondary::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+}
+.lu-btn-secondary:active:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 1.5px rgba(46, 196, 214, 0.55),
+    0 1px 0 #061517;
+}
+
+.lu-btn-reward {
+  background: linear-gradient(180deg, var(--lu-orange-hi) 0%, var(--lu-orange) 48%, var(--lu-orange-lo) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 0 var(--lu-orange-edge),
+    0 10px 20px -8px rgba(255, 194, 61, 0.55);
+  color: #3a2600;
+}
+.lu-btn-reward:active:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 2px 0 var(--lu-orange-edge);
+}
+
+/* Destructive: restrained, no gloss, no glow. */
+.lu-btn-danger {
+  background: linear-gradient(180deg, var(--lu-red) 0%, var(--lu-red-lo) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 3px 0 var(--lu-red-edge);
+}
+.lu-btn-danger::after {
+  display: none;
+}
+.lu-btn-danger:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--lu-red-edge);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lu-btn {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- brand
+   Deep teal "game table" surfaces with a soft warm glow. */
+.bg-stage,
+.bg-final {
+  background:
+    radial-gradient(110% 55% at 85% -10%, rgba(255, 122, 69, 0.16), transparent 60%),
+    radial-gradient(90% 50% at 0% 0%, rgba(46, 196, 214, 0.18), transparent 60%),
+    linear-gradient(180deg, #123a3f 0%, #0d2a2f 36%, #0a1c20 72%) !important;
+}
+.card,
+.surface {
+  background: rgba(46, 196, 214, 0.08);
+  border: 1px solid rgba(46, 196, 214, 0.26);
+}
+.font-display {
+  letter-spacing: -0.015em;
+}

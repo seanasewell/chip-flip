@@ -1,0 +1,695 @@
+/* ==========================================================================
+   Lineup: editorial neo-brutalist, with a wink at the 90s desktop.
+   Warm paper on a faint grid, near-black ink, square corners, hard offset
+   shadows, condensed uppercase headlines, mono labels, acid-yellow calls to
+   action with an arrow, hot pink and electric blue accents, and slim "OS"
+   windows with three dots. Loaded last so it governs every screen.
+   ========================================================================== */
+:root {
+  --lu-ink: #111111;
+  --lu-paper: #fffdf6;
+  --lu-cream: #f3f1ea;
+  --lu-blue: #3355ff;
+  --lu-pink: #ff2e93;
+  --lu-acid: #ea5b0c;
+  --lu-green: #39ff6a;
+  /* Neon green is the UI accent; blue, pink and orange are for gameplay. */
+  --lu-neon: #39ff6a;
+  --lu-shadow: 4px 4px 0 var(--lu-ink);
+  --lu-shadow-sm: 3px 3px 0 var(--lu-ink);
+  --lu-ease: cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+
+/* ------------------------------------------------------------- paper */
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  color: var(--lu-ink);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  background: var(--lu-cream);
+}
+.bg-stage,
+.bg-final {
+  background-color: var(--lu-cream) !important;
+  background-image:
+    linear-gradient(rgba(17, 17, 17, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.07) 1px, transparent 1px) !important;
+  background-size: 28px 28px, 28px 28px !important;
+}
+.font-display {
+  font-family: "Anton", Impact, sans-serif !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+::selection {
+  background: var(--lu-neon);
+  color: var(--lu-ink);
+}
+
+/* Mono labels: "(01) Games". */
+.lu-label {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lu-ink);
+}
+/* Outline tags. */
+.lu-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--lu-ink);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lu-num {
+  font-family: "Anton", Impact, sans-serif;
+  color: var(--lu-paper);
+  -webkit-text-stroke: 1.5px var(--lu-ink);
+  paint-order: stroke fill;
+  line-height: 0.9;
+}
+
+/* Legible accent text on paper. */
+.text-amber {
+  color: #e8157a !important;
+}
+.text-mint {
+  color: #0e8f57 !important;
+}
+.text-sky,
+.text-iris {
+  color: var(--lu-blue) !important;
+}
+.text-coral {
+  color: #e0157a !important;
+}
+
+/* White text that sits on a coloured fill stays white. */
+.bg-iris.text-white,
+.bg-coral.text-white,
+.bg-mint.text-white,
+.select-none.rounded-full.text-white,
+.level-badge,
+.level-badge * {
+  color: #fff !important;
+}
+.bg-amber.text-white,
+.bg-amber .text-white {
+  color: var(--lu-ink) !important;
+}
+
+/* --------------------------------------------------- shape: square */
+[class*="rounded-"]:not(.rounded-full):not(.rt-keep) {
+  border-radius: 0 !important;
+}
+
+/* ------------------------------------------------------------- cards */
+.card,
+.rt-window {
+  background: var(--lu-paper) !important;
+  border: 2px solid var(--lu-ink) !important;
+  box-shadow: var(--lu-shadow) !important;
+}
+.rt-window-dark {
+  background: var(--lu-ink) !important;
+  color: var(--lu-paper);
+}
+.surface {
+  background: var(--lu-paper) !important;
+  border: 1.5px solid var(--lu-ink) !important;
+  box-shadow: none !important;
+}
+.divider {
+  border-color: rgba(17, 17, 17, 0.2) !important;
+}
+.sweep-border {
+  display: none !important;
+}
+.rt-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 10px;
+  border-bottom: 1.5px solid var(--lu-ink);
+  background: var(--lu-paper);
+  color: var(--lu-ink);
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.rt-window-dark .rt-titlebar {
+  background: var(--lu-ink);
+  color: var(--lu-paper);
+  border-bottom-color: rgba(255, 253, 246, 0.25);
+}
+.rt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+/* Inputs: square, ink outline, acid focus. */
+.field {
+  background: #fff !important;
+  border: 2px solid var(--lu-ink) !important;
+  color: var(--lu-ink) !important;
+  box-shadow: none !important;
+}
+.field:focus {
+  box-shadow: var(--lu-shadow-sm) !important;
+  outline: none !important;
+}
+.field::placeholder {
+  color: rgba(17, 17, 17, 0.45) !important;
+}
+
+/* Sheets slide up as a paper panel with an ink top edge. */
+.animate-sheetUp > div {
+  border-top: 2px solid var(--lu-ink);
+  background: var(--lu-cream) !important;
+}
+.bg-black\/60 {
+  background: rgba(17, 17, 17, 0.55) !important;
+  backdrop-filter: none !important;
+}
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+}
+
+/* White sign-in buttons: outlined with a hard shadow. */
+.bg-white.text-black,
+button.bg-white {
+  border: 2px solid var(--lu-ink) !important;
+  box-shadow: var(--lu-shadow-sm) !important;
+}
+
+/* ------------------------------------------------------------ buttons */
+.lu-btn {
+  border: 2px solid var(--lu-ink) !important;
+  border-radius: 0 !important;
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0;
+  text-shadow: none !important;
+  box-shadow: var(--lu-shadow) !important;
+  gap: 0.5em;
+  transition:
+    transform 110ms var(--lu-ease),
+    box-shadow 110ms var(--lu-ease) !important;
+}
+.lu-btn.grid,
+.lu-btn.flex {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.lu-btn.inline-grid,
+.lu-btn.inline-flex {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.lu-btn::after {
+  content: none !important;
+}
+/* Primary calls to action carry an arrow, like the studio's buttons. */
+.lu-btn-primary::after {
+  content: "\2197" !important;
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  z-index: auto !important;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 110ms var(--lu-ease);
+}
+.lu-btn-primary:hover::after {
+  transform: translate(2px, -2px);
+}
+.lu-btn:active:not(:disabled) {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0 0 0 var(--lu-ink) !important;
+}
+.lu-btn-primary {
+  background: var(--lu-neon) !important;
+  color: var(--lu-ink) !important;
+}
+.lu-btn-secondary {
+  background: var(--lu-paper) !important;
+  color: var(--lu-ink) !important;
+}
+.lu-btn-reward {
+  background: var(--lu-blue) !important;
+  color: #fff !important;
+}
+.lu-btn-danger {
+  background: #e11d2e !important;
+  color: #fff !important;
+}
+.lu-btn:disabled {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+.lu-btn:focus-visible,
+.rt-icon-btn:focus-visible {
+  outline: 2px dashed var(--lu-blue) !important;
+  outline-offset: 3px;
+}
+
+/* Square icon buttons. */
+.rt-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  background: var(--lu-paper);
+  border: 2px solid var(--lu-ink);
+  box-shadow: var(--lu-shadow-sm);
+  color: var(--lu-ink);
+  transition:
+    transform 110ms var(--lu-ease),
+    box-shadow 110ms var(--lu-ease);
+}
+.rt-icon-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+/* Arrow square used on list rows. */
+.lu-arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--lu-paper);
+  border: 2px solid var(--lu-ink);
+  box-shadow: 3px 3px 0 var(--lu-neon), 3px 3px 0 1.5px var(--lu-ink);
+  color: var(--lu-ink);
+  transition: transform 110ms var(--lu-ease);
+}
+
+/* ------------------------------------------------- loading and progress */
+.rt-progress {
+  height: 14px !important;
+  background: var(--lu-paper) !important;
+  border: 2px solid var(--lu-ink);
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+.rt-progress > div {
+  border-radius: 0 !important;
+  background: var(--lu-blue) !important;
+}
+
+/* Blinking cursor in place of soft loading dots. */
+.loading-dots span {
+  animation: none !important;
+  opacity: 1 !important;
+}
+.loading-dots::after,
+.rt-cursor::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: -0.15em;
+  background: var(--lu-pink);
+  animation: rtBlink 1s steps(1, end) infinite;
+}
+@keyframes rtBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Marching ants for playable spaces. */
+@keyframes rtAnts {
+  to {
+    background-position: 8px 0, -8px 100%, 0 -8px, 100% 8px;
+  }
+}
+.rt-ants {
+  background-image:
+    linear-gradient(90deg, var(--lu-ink) 50%, transparent 0),
+    linear-gradient(90deg, var(--lu-ink) 50%, transparent 0),
+    linear-gradient(0deg, var(--lu-ink) 50%, transparent 0),
+    linear-gradient(0deg, var(--lu-ink) 50%, transparent 0);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 8px 2px, 8px 2px, 2px 8px, 2px 8px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  animation: rtAnts 0.6s linear infinite;
+}
+
+/* Ticker band. */
+@keyframes luMarquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.lu-marquee-track {
+  animation: luMarquee 22s linear infinite;
+}
+
+/* Snappy, slightly springy motion. */
+.animate-pop,
+.animate-fadeUp,
+.animate-sheetUp,
+.animate-luDrop,
+.animate-luDeal,
+.animate-luPip,
+.animate-luWin {
+  animation-timing-function: var(--lu-ease) !important;
+}
+
+/* ---------------------------------------------------------- navigation */
+.rt-taskbar {
+  background: var(--lu-paper);
+  border-top: 2px solid var(--lu-ink);
+}
+.rt-tab,
+.rt-tab * {
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+.rt-tab {
+  border: 2px solid transparent;
+  color: var(--lu-ink);
+}
+.rt-tab-on {
+  background: var(--lu-ink);
+  border-color: var(--lu-ink);
+  box-shadow: 3px 3px 0 var(--lu-neon);
+  color: var(--lu-neon);
+}
+.rt-tab-on,
+.rt-tab-on * {
+  opacity: 1 !important;
+  filter: none !important;
+}
+.rt-tab-on > span:last-child {
+  color: var(--lu-paper) !important;
+}
+.rt-tab > span:last-child {
+  font-family: "Space Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 9.5px !important;
+}
+
+/* Toggles: squared, ink outline. */
+button.h-7.w-12.rounded-full {
+  border: 2px solid var(--lu-ink);
+  border-radius: 0 !important;
+}
+button.h-7.w-12.rounded-full > span {
+  border-radius: 0 !important;
+  border: 2px solid var(--lu-ink);
+  top: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Level badge and avatars: sticker outline. */
+.level-badge,
+.select-none.rounded-full.text-white.font-display {
+  box-shadow: 0 0 0 2px var(--lu-ink) !important;
+  text-shadow: none !important;
+}
+/* Level badges are flat colour; only level 100 keeps its mesh. */
+.level-badge:not(.tier-9) {
+  background: var(--c0) !important;
+  background-image: none !important;
+}
+.level-badge:not(.tier-9) .level-badge-face {
+  background: var(--c0) !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.level-badge:not(.tier-9) .level-badge-mesh {
+  display: none !important;
+}
+.level-badge:not(.tier-9) .level-badge-num {
+  text-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rt-ants,
+  .lu-marquee-track,
+  .loading-dots::after,
+  .rt-cursor::after {
+    animation: none !important;
+  }
+}
+
+/* Tinted panels from the shell (ads, podium rows, mode summary, standings):
+   solid paper with an ink frame and a colour stripe instead of a wash. */
+:is([class*="rounded-2xl"], [class*="rounded-3xl"]):is([class*="bg-amber/"], [class*="bg-iris/"], [class*="bg-coral/"], [class*="bg-mint/"], [class*="bg-sky/"]) {
+  background: var(--lu-paper) !important;
+  border: 2px solid var(--lu-ink) !important;
+  box-shadow: inset 7px 0 0 var(--lu-stripe, var(--lu-blue)), 3px 3px 0 var(--lu-ink) !important;
+}
+[class*="bg-amber/"] {
+  --lu-stripe: var(--lu-neon);
+}
+[class*="bg-coral/"] {
+  --lu-stripe: var(--lu-pink);
+}
+[class*="bg-mint/"] {
+  --lu-stripe: var(--lu-green);
+}
+:is([class*="rounded-2xl"], [class*="rounded-3xl"]):is([class*="bg-white/[.0"], [class*="bg-white/5"], [class*="bg-white/10"]):not(.lu-btn) {
+  background: var(--lu-paper) !important;
+  border: 1.5px solid var(--lu-ink) !important;
+}
+
+/* Any shell button that isn't already flex keeps its arrow on the same line. */
+.lu-btn:not(.grid):not(.flex):not(.inline-grid):not(.inline-flex) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.lu-btn.w-full {
+  display: flex !important;
+}
+
+/* Gradient promo banners (Remove ads and friends): paper card, ink frame. */
+[class*="bg-gradient"]:is([class*="from-amber/"], [class*="from-iris/"], [class*="from-coral/"], [class*="from-mint/"]) {
+  background: var(--lu-paper) !important;
+  border: 2px solid var(--lu-ink) !important;
+  box-shadow: 4px 4px 0 var(--lu-neon), 4px 4px 0 2px var(--lu-ink) !important;
+}
+.rounded-xl:is([class*="bg-amber/"], [class*="bg-iris/"], [class*="bg-coral/"], [class*="bg-mint/"]) {
+  background: var(--lu-acid) !important;
+  border: 1.5px solid var(--lu-ink);
+}
+
+/* Pages only scroll vertically; nothing can drag the page sideways. */
+[class*="overflow-y-auto"],
+[class*="overflow-auto"] {
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none;
+}
+#root,
+#root > div {
+  max-width: 100vw;
+  overflow-x: clip;
+}
+.lu-ribbons {
+  touch-action: pan-y;
+}
+.max-w-\[480px\] {
+  overflow-x: clip;
+}
+
+/* Notices: solid colour, light text, no border. */
+.lu-toast {
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #fffdf6 !important;
+  font-weight: 700 !important;
+  box-shadow: 4px 4px 0 var(--lu-ink) !important;
+}
+.lu-toast-good {
+  background: #0e9f55 !important;
+}
+.lu-toast-bad {
+  background: #e5134f !important;
+}
+.lu-toast-warn {
+  background: var(--lu-acid) !important;
+}
+
+/* Emoji icon tiles (challenges, achievements, ads): no tinted square. */
+.rounded-xl:is([class*="bg-white/[.0"], [class*="bg-amber/"], [class*="bg-mint/"], [class*="bg-iris/"], [class*="bg-coral/"]):is(.h-11, .h-10, .h-9, [class*="h-[42px]"], .h-12) {
+  background: transparent !important;
+  border: 0 !important;
+}
+/* Price tag: neon accent with ink text. */
+.bg-amber[class*="text-[#3A2400]"] {
+  background: var(--lu-neon) !important;
+  color: var(--lu-ink) !important;
+  border: 2px solid var(--lu-ink);
+}
+/* Light text on orange fills. */
+.bg-amber.zz-none,
+.bg-amber.text-ink-900,
+.bg-amber.text-black {
+  color: #fffdf6 !important;
+}
+
+/* Badges: neon green with ink text. */
+.lu-badge {
+  background: var(--lu-neon) !important;
+  border-color: var(--lu-ink) !important;
+  color: var(--lu-ink) !important;
+}
+
+/* Spinning loader icon. */
+@keyframes luSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lu-spin {
+  animation: luSpin 1.1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lu-spin {
+    animation: none;
+  }
+}
+
+/* Sequence chips flip over to show a crown. */
+.lu-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1100ms cubic-bezier(0.3, 1.25, 0.5, 1);
+}
+.lu-face {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.lu-back {
+  transform: rotateY(180deg);
+}
+
+/* The card you just drew deals in and wears a "New" tag. */
+@keyframes luDealIn {
+  0% {
+    transform: translateY(80px) rotate(-12deg) scale(0.8);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(-20px) rotate(3deg) scale(1.06);
+    opacity: 1;
+  }
+  78% {
+    transform: translateY(4px) rotate(-1deg) scale(1);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes luTagPop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.lu-newcard {
+  animation: luDealIn 850ms cubic-bezier(0.2, 0.9, 0.3, 1) 250ms both;
+}
+.lu-newtag {
+  animation: luTagPop 380ms cubic-bezier(0.2, 0.9, 0.3, 1.4) 950ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lu-newcard,
+  .lu-newtag {
+    animation: none;
+  }
+  .lu-flip {
+    transition: none;
+  }
+}
+
+/* Welcome logo: chips pop in with the name, pink and orange dissolve into
+   blue, then every chip flips left to right to show a crown. */
+@keyframes luWlPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes luWlText {
+  0% { transform: translateY(14px); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes luWlOut {
+  0% { opacity: 1; filter: blur(0) brightness(1); transform: scale(1) rotate(0); }
+  25% { opacity: 1; filter: blur(1px) brightness(1.3); transform: scale(1.12) rotate(-6deg); }
+  100% { opacity: 0; filter: blur(16px) brightness(1.6); transform: scale(1.7) rotate(18deg); }
+}
+@keyframes luWlIn {
+  0% { opacity: 0; transform: scale(0.6); }
+  70% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes luWlFlip {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+.lu-wl-pop { animation: luWlPop 520ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+
+.lu-wl-out { animation: luWlOut 900ms cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+.lu-wl-in { animation: luWlIn 520ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.lu-wl-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: luWlFlip 900ms cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+.lu-wl-face {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.lu-wl-back { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .lu-wl-pop, .lu-wl-text, .lu-wl-in { animation: none; }
+  .lu-wl-out { animation: none; opacity: 0; }
+  .lu-wl-flip { animation: none; transform: rotateY(180deg); }
+}

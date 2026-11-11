@@ -1,0 +1,3 @@
+{ "root": true, "parserOptions": { "ecmaVersion": 2022, "sourceType": "script" }, "env": { "browser": true, "es2022": true },
+  "globals": { "LU": "readonly", "globalThis": "readonly", "__REACT_DEVTOOLS_GLOBAL_HOOK__": "readonly", "structuredClone": "readonly" },
+  "rules": { "no-undef": "error" } }

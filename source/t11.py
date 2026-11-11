@@ -1,0 +1,31 @@
+import asyncio
+from playwright.async_api import async_playwright
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
+        ctx = await b.new_context(viewport={"width":390,"height":844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+        pg = await ctx.new_page(); errs=[]
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        await pg.goto("file:///home/claude/lw/build/index.html"); await pg.wait_for_timeout(600)
+        await pg.get_by_text("Play as a guest").click()
+        await pg.fill('input[aria-label="Display name"]', "Sean")
+        await pg.get_by_text("Continue").click(); await pg.get_by_text("Skip for now").click(); await pg.wait_for_timeout(400)
+        await pg.get_by_role("button", name="Show me").click(); await pg.wait_for_timeout(300)
+        await pg.locator('button.lu-card').first.click(); await pg.wait_for_timeout(200)
+        await pg.screenshot(path="shots/tu-1.png")
+        await pg.locator('[role=gridcell][aria-label$="available"]').first.click(); await pg.wait_for_timeout(1000)
+        await pg.get_by_role("button", name="Next").click(); await pg.wait_for_timeout(300)
+        await pg.locator('button.lu-card[aria-label*="wild"]').click(); await pg.wait_for_timeout(200)
+        await pg.screenshot(path="shots/tu-2.png")
+        await pg.locator('[role=gridcell]').nth(56).click(); await pg.wait_for_timeout(900)
+        await pg.screenshot(path="shots/tu-3.png")
+        await pg.get_by_role("button", name="Next").click(); await pg.wait_for_timeout(300)
+        await pg.locator('button.lu-card[aria-label*="removes"]').click(); await pg.wait_for_timeout(200)
+        await pg.screenshot(path="shots/tu-4.png")
+        await pg.locator('[role=gridcell][aria-label$="tap to remove"]').first.click(); await pg.wait_for_timeout(500)
+        await pg.get_by_role("button", name="Next").click(); await pg.wait_for_timeout(300)
+        await pg.screenshot(path="shots/tu-5.png")
+        await pg.get_by_role("button", name="Done").click(); await pg.wait_for_timeout(400)
+        print("home visible:", await pg.get_by_text("Games").count(), errs)
+        await b.close()
+asyncio.run(main())
