@@ -3,7 +3,7 @@
 // and blue ones take their place, then all five flip over to crowns.
 import { useEffect } from 'react';
 import { Image, View } from 'react-native';
-import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming, type SharedValue } from 'react-native-reanimated';
 
 const LOGO = require('@/assets/images/logo.png');
 const BLUE = require('@/assets/images/blue.png');
@@ -19,9 +19,32 @@ export function Wordmark({ height = 40 }: { height?: number }) {
 }
 
 // Same timeline and keyframes as the web prototype's welcome logo.
+// Chip dust: a fixed scatter of pieces flying out from the chip's center.
+type Piece = { angle: number; dist: number; size: number; spin: number; light: boolean; lift: number };
+const PARTICLES: Piece[] = Array.from({ length: 18 }, (_, i) => {
+  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
+  return { angle: (i / 18) * Math.PI * 2 + r(1) * 0.5, dist: 0.55 + r(2) * 0.75, size: 0.07 + r(3) * 0.09, spin: (r(4) - 0.5) * 540, light: i % 3 === 0, lift: 0.2 + r(5) * 0.3 };
+});
+const PINK_HEX = '#FF2E93';
+const ORANGE_HEX = '#EA5B0C';
+
+function Particle({ p, t, size, color }: { p: Piece; t: SharedValue<number>; size: number; color: string }) {
+  const s = Math.max(2, Math.round(size * p.size));
+  const style = useAnimatedStyle(() => {
+    const k = Math.max(0, Math.min(1, (t.value - 0.12) / 0.75));
+    const e = 1 - (1 - k) * (1 - k) * (1 - k); // fast out, then drifting
+    const dx = Math.cos(p.angle) * p.dist * size * e;
+    const dy = Math.sin(p.angle) * p.dist * size * e - p.lift * size * e + 0.6 * size * k * k; // up, then falling
+    return {
+      opacity: t.value < 0.12 ? 0 : interpolate(k, [0, 0.55, 1], [1, 0.9, 0], Extrapolation.CLAMP),
+      transform: [{ translateX: dx }, { translateY: dy }, { rotate: `${p.spin * k}deg` }, { scale: interpolate(k, [0, 1], [1, 0.35]) }],
+    };
+  });
+  return <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: size / 2 - s / 2, top: size / 2 - s / 2, width: s, height: s, backgroundColor: p.light ? '#FFFFFF' : color, borderRadius: p.light ? s / 2 : 1 }, style]} />;
+}
+
 const D = 2000; // the chips wait 2 s after the screen appears; the name is there from the start
 const POP = Easing.bezier(0.2, 0.9, 0.3, 1);
-const OUT = Easing.bezier(0.5, 0, 0.75, 0.4);
 const FLIP = Easing.bezier(0.45, 0, 0.25, 1);
 
 function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: number; start: number; blur?: number }) {
@@ -34,7 +57,7 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
   useEffect(() => {
     pop.value = withDelay(D + i * 180, withTiming(1, { duration: 520, easing: POP }));
     if (swaps) {
-      out.value = withDelay(swapAt, withTiming(1, { duration: 900, easing: OUT }));
+      out.value = withDelay(swapAt, withTiming(1, { duration: 900, easing: Easing.linear }));
       // A pause after the burst, then the blue chip pops into the empty spot.
       inn.value = withDelay(swapAt + 1500, withTiming(1, { duration: 520, easing: POP }));
     }
@@ -49,15 +72,19 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
   // The flip turns the chip over in 3D; each face hides when turned away.
   const front = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${flip.value * 180}deg` }] }));
   const back = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${180 + flip.value * 180}deg` }] }));
-  // The dissolve: brightens, swells and spins away into a blur.
+  // The dissolve is abrupt: a quick punch, then the chip bursts into
+  // particles with a flash of light, gone in about a quarter second.
   const burst = useAnimatedStyle(() => ({
     transform: [
-      { scale: interpolate(out.value, [0, 0.25, 1], [1, 1.12, 1.7]) },
-      { rotate: `${interpolate(out.value, [0, 0.25, 1], [0, -6, 18])}deg` },
+      { scale: interpolate(out.value, [0, 0.12, 0.3], [1, 1.22, 0.25], Extrapolation.CLAMP) },
+      { rotate: `${interpolate(out.value, [0, 0.12, 0.3], [0, -8, 25], Extrapolation.CLAMP)}deg` },
     ],
   }));
-  const sharp = useAnimatedStyle(() => ({ opacity: interpolate(out.value, [0, 0.2, 0.55], [1, 1, 0], Extrapolation.CLAMP) }));
-  const soft = useAnimatedStyle(() => ({ opacity: interpolate(out.value, [0, 0.2, 0.55, 1], [0, 0.35, 0.9, 0], Extrapolation.CLAMP) }));
+  const sharp = useAnimatedStyle(() => ({ opacity: interpolate(out.value, [0, 0.14, 0.3], [1, 1, 0], Extrapolation.CLAMP) }));
+  const soft = useAnimatedStyle(() => ({
+    opacity: interpolate(out.value, [0, 0.1, 0.45], [0, 0.85, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(out.value, [0, 0.1, 0.45], [0.9, 1.3, 1.9], Extrapolation.CLAMP) }],
+  }));
   const inStyle = useAnimatedStyle(() => ({
     opacity: interpolate(inn.value, [0, 0.7, 1], [0, 1, 1], Extrapolation.CLAMP),
     transform: [{ scale: interpolate(inn.value, [0, 0.7, 1], [0.6, 1.08, 1], Extrapolation.CLAMP) }],
@@ -67,15 +94,18 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
   const big = size * (355 / 155);
 
   return (
-    <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size }, popStyle]}>
+    <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size, zIndex: swaps ? 2 : 1 }, popStyle]}>
       <Animated.View style={[face, front]}>
         {swaps ? (
           <>
             <Animated.Image source={BLUE} style={[img, inStyle]} />
+            <Animated.Image source={blur} style={[{ position: 'absolute', width: big, height: big, left: (size - big) / 2, top: (size - big) / 2 }, soft]} />
             <Animated.View style={[{ position: 'absolute', width: size, height: size }, burst]}>
-              <Animated.Image source={blur} style={[{ position: 'absolute', width: big, height: big, left: (size - big) / 2, top: (size - big) / 2 }, soft]} />
               <Animated.Image source={start} style={[img, sharp]} />
             </Animated.View>
+            {PARTICLES.map((pt, k) => (
+              <Particle key={k} p={pt} t={out} size={size} color={start === PINK ? PINK_HEX : ORANGE_HEX} />
+            ))}
           </>
         ) : (
           <Image source={BLUE} style={img} />
