@@ -74,6 +74,7 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
   return (
     <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size, zIndex: swaps ? 2 : 1 }, popStyle]}>
       <FlipCoin
+        shadow={false}
         p={flip}
         size={size}
         edge="#1F3AD6"
