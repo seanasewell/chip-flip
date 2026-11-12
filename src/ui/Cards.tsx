@@ -45,20 +45,22 @@ export const TileFace = memo(function TileFace({ cell, size, dim = false }: { ce
 export type CardState = 'available' | 'selected' | 'disabled' | 'dead';
 
 /** A playing card in the hand. Jacks say what they do. */
-export function HandCard({ card, width, state, onPress, fresh = false }: { card: CardId; width: number; state: CardState; onPress?: () => void; fresh?: boolean }) {
+export function HandCard({ card, width, state, onPress, fresh = false, dead: deadCard = false }: { card: CardId; width: number; state: CardState; onPress?: () => void; fresh?: boolean; dead?: boolean }) {
   const k = cardFace(card);
   const color = SUIT_COLOR[k.suit];
   const h = Math.round(width * 1.4);
   const sel = state === 'selected';
   const wild = isWildJack(card);
   const remove = isRemoveJack(card);
+  // Stays marked dead while selected (for the swap).
+  const dead = state === 'dead' || deadCard;
   const pad = Math.max(3, Math.round(width * 0.07));
   const lift = useSharedValue(0);
   useEffect(() => {
     lift.value = withTiming(sel ? -Math.round(h * 0.14) : 0, { duration: LIFT_MS, easing: liftEasing });
   }, [sel, h, lift]);
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: lift.value }] }));
-  const label = `${faceLabel(k)}${wild ? ', wild: place anywhere' : remove ? ", removes an opponent's chip" : ''}${state === 'dead' ? ', dead card' : ''}${sel ? ', selected' : ''}`;
+  const label = `${faceLabel(k)}${wild ? ', wild: place anywhere' : remove ? ", removes an opponent's chip" : ''}${dead ? ', dead card' : ''}${sel ? ', selected' : ''}`;
   return (
     <Animated.View style={style}>
       {fresh && (
@@ -69,7 +71,7 @@ export function HandCard({ card, width, state, onPress, fresh = false }: { card:
         </View>
       )}
       <Pressable onPress={onPress} disabled={state === 'disabled'} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: sel, disabled: state === 'disabled' }}>
-        <View style={{ width: width + 3, height: h + 3, opacity: state === 'disabled' ? 0.5 : state === 'dead' && !sel ? 0.65 : 1 }}>
+        <View style={{ width: width + 3, height: h + 3, opacity: state === 'disabled' ? 0.5 : 1 }}>
           <View style={{ position: 'absolute', left: 3, top: 3, width, height: h, backgroundColor: C.ink }} />
           <View style={{ width, height: h, backgroundColor: C.white, borderWidth: 2, borderColor: C.ink, overflow: 'hidden' }}>
             {(wild || remove) && (
@@ -85,24 +87,16 @@ export function HandCard({ card, width, state, onPress, fresh = false }: { card:
               </Text>
               <SuitIcon suit={k.suit} size={width * 0.22} color={color} />
             </View>
-            {wild || remove ? (
-              <View style={{ position: 'absolute', left: pad, right: pad, bottom: pad, backgroundColor: C.green, borderWidth: 1.5, borderColor: C.ink, paddingVertical: 2, alignItems: 'center' }}>
+            {wild || remove || dead ? (
+              // Jacks say what they do; a dead card says it's dead, in the same spot.
+              <View style={{ position: 'absolute', left: pad, right: pad, bottom: pad, backgroundColor: dead ? C.orange : C.green, borderWidth: 1.5, borderColor: C.ink, paddingVertical: 2, alignItems: 'center' }}>
                 <Text allowFontScaling={false} style={{ fontFamily: F.monoBold, fontSize: Math.max(7.5, width * 0.13), color: C.ink, textTransform: 'uppercase' }}>
-                  {wild ? 'Wild' : 'Remove'}
+                  {wild ? 'Wild' : remove ? 'Remove' : 'Dead'}
                 </Text>
               </View>
             ) : (
               <View style={{ position: 'absolute', left: 0, right: 0, bottom: '10%', alignItems: 'center' }}>
                 <SuitIcon suit={k.suit} size={width * 0.5} color={color} />
-              </View>
-            )}
-            {state === 'dead' && (
-              <View style={{ position: 'absolute', left: 0, right: 0, top: '42%', alignItems: 'center' }}>
-                <View style={{ backgroundColor: C.orange, borderWidth: 1.5, borderColor: C.ink, paddingHorizontal: 4 }}>
-                  <Text allowFontScaling={false} style={{ fontFamily: F.monoBold, fontSize: Math.max(7.5, width * 0.14), color: C.ink, textTransform: 'uppercase' }}>
-                    Dead
-                  </Text>
-                </View>
               </View>
             )}
           </View>

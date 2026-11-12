@@ -190,7 +190,7 @@ function HandArea({ m, seat, myTurn, selected, reveal, onReveal, width, bottom }
               const nu = isFresh(card);
               return (
                 <Animated.View key={nu ? `${card}-${fresh!.key}` : card} entering={nu ? dealIn : undefined}>
-                  <HandCard card={card} width={cardW} state={state} fresh={nu} onPress={() => game.selectCard(card)} />
+                  <HandCard card={card} width={cardW} state={state} dead={myTurn && isDead(m, card)} fresh={nu} onPress={() => game.selectCard(card)} />
                 </Animated.View>
               );
             })
