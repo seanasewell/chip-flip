@@ -96,12 +96,12 @@ export function Results() {
 
         {!casual && earned && levelOf(earned.xpFrom).level !== levelOf(earned.xpTo).level && (
           <Animated.View entering={pop(500)} style={{ marginTop: 16 }}>
-            <Card shadow={C.green} bg={C.ink}>
+            <Card shadow={C.green}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
                 <LevelBadge level={levelOf(earned.xpTo).level} size={46} />
                 <View style={{ flex: 1 }}>
-                  <Display size={22} style={{ color: C.paper }}>Level up!</Display>
-                  <T style={{ color: 'rgba(255,253,246,0.75)', fontSize: 13 }}>You’re now level {levelOf(earned.xpTo).level} · {levelOf(earned.xpTo).title}</T>
+                  <Display size={22}>Level up!</Display>
+                  <T style={{ color: C.muted, fontSize: 13 }}>You’re now level {levelOf(earned.xpTo).level} · {levelOf(earned.xpTo).title}</T>
                 </View>
               </View>
             </Card>
