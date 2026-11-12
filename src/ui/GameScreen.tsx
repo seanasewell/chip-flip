@@ -3,11 +3,13 @@ import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MODES, isRemoveJack, isWildJack } from '@/core/board';
+import { MODES, cellLabel, isRemoveJack, isWildJack } from '@/core/board';
 import { canSwap, currentSeatId, isDead, seatById, targetsFor, toWin } from '@/core/engine';
 import type { CardId, MatchState, Seat } from '@/core/types';
 import { game, useGame } from '@/lib/game';
 import { Board } from './Board';
+import { TileFace } from './Cards';
+import { ChipIcon } from './Chip';
 import { CardBack, HandCard, type CardState } from './Cards';
 import { Icon } from './icons';
 import { Badge, Button, Card, Display, IconButton, Label, Paper, Row, Sheet, T, Toggle } from './kit';
@@ -16,7 +18,7 @@ import { Spin, dealIn, fadeIn, fadeOut, fadeUp, pop } from './motion';
 import { Results } from './Results';
 import { RulesList } from './Rules';
 import { musicEnabled, onSoundChange, setMusicEnabled, setSoundEnabled, soundEnabled } from './sound';
-import { C, F, applySideColors } from './theme';
+import { C, F, applySideColors, sideColor } from './theme';
 
 export function useSoundSettings() {
   const sound = useSyncExternalStore(onSoundChange, soundEnabled, soundEnabled);
@@ -101,6 +103,8 @@ function Table() {
           )}
         </View>
 
+        <LastPlay m={m} />
+
         <HandArea m={m} seat={handSeat} myTurn={myTurn} selected={g.selected} reveal={reveal} onReveal={() => setReveal((v) => !v)} width={Math.min(W, 580)} bottom={insets.bottom} />
       </View>
 
@@ -146,7 +150,7 @@ function StatusLine({ m, cur, myTurn, selected, thinking, handoff }: { m: MatchS
   } else if (thinking) text = `${cur.name} is thinking…`;
   else text = turn;
   return (
-    <Animated.View key={`${cur.id}-${m.phase}-${selected ?? ''}-${myTurn}`} entering={fadeIn()} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLiveRegion="polite">
+    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLiveRegion="polite">
       <Label numberOfLines={1} style={{ flexShrink: 1, fontSize: 9.5 }}>
         {text}
       </Label>
@@ -155,7 +159,7 @@ function StatusLine({ m, cur, myTurn, selected, thinking, handoff }: { m: MatchS
           <Label style={{ fontSize: 9.5, color: C.paper }}>Swap it</Label>
         </Pressable>
       )}
-    </Animated.View>
+    </View>
   );
 }
 
@@ -344,5 +348,49 @@ function MatchMenu({ which, set }: { which: null | 'menu' | 'rules' | 'forfeit';
         </View>
       </Sheet>
     </>
+  );
+}
+
+/** Play-by-play: what happened on the last turn, with the space it was on. */
+function LastPlay({ m }: { m: MatchState }) {
+  const mv = [...m.moves].reverse().find((x) => x.action.kind !== 'swap') ?? null;
+  const swap = m.moves[m.moves.length - 1]?.action.kind === 'swap' ? m.moves[m.moves.length - 1] : null;
+  const show = swap && (!mv || swap.n > mv.n) ? swap : mv;
+  const H = 46;
+  if (!show) {
+    return (
+      <View style={{ height: H, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
+        <Label style={{ fontSize: 9.5, opacity: 0.55 }}>No plays yet</Label>
+      </View>
+    );
+  }
+  const seat = seatById(m, show.seat);
+  const who = seat.kind === 'you' ? 'You' : seat.name;
+  const a = show.action;
+  const cellOf = a.kind === 'swap' ? null : a.cell;
+  const place = cellOf != null ? cellLabel(cellOf).toLowerCase() : '';
+  let text: string;
+  if (a.kind === 'swap') text = `${who} swapped a dead card`;
+  else if (a.kind === 'remove') {
+    // Whose chip came off: with two sides it's the other one.
+    const victim = m.sides.length === 2 ? m.sides.find((sd) => sd.index !== show.side)! : null;
+    const yours = victim ? victim.seats.includes('you') : false;
+    text = `${who} removed ${yours ? 'your' : victim ? `${victim.name}'s` : 'a'} chip from the ${place}`;
+  } else if (isWildJack(a.card)) text = `${who} played a wild jack on the ${place}`;
+  else text = `${who} placed a chip on the ${place}`;
+  if (show.newSequences > 0) text += show.newSequences > 1 ? ' and completed two sequences!' : ' and completed a sequence!';
+  return (
+    <Animated.View key={show.n} entering={fadeUp(0, 300)} style={{ height: H, marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 }} accessibilityLiveRegion="polite">
+      <View style={{ width: H - 6, height: H - 6, borderWidth: 2, borderColor: C.ink, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' }}>
+        {cellOf != null ? <TileFace cell={cellOf} size={H - 10} /> : <Icon name="arrow" size={16} />}
+        <View style={{ position: 'absolute', right: -6, bottom: -6 }}>
+          <ChipIcon color={sideColor(show.side)} size={18} mark={0.5} />
+        </View>
+      </View>
+      <T numberOfLines={2} style={{ flex: 1, fontSize: 13.5, lineHeight: 18 }}>
+        <T style={{ fontFamily: F.bodyBold, fontSize: 13.5 }}>{who}</T>
+        {text.slice(who.length)}
+      </T>
+    </Animated.View>
   );
 }
