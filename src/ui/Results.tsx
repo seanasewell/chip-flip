@@ -1,4 +1,4 @@
-import { ScrollView, Share, View } from 'react-native';
+import { ScrollView, Share, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,6 +10,7 @@ import { levelOf, progress } from '@/lib/progress';
 import { useEffect, useState } from 'react';
 import { LevelBadge } from './LevelBadge';
 import { Odometer } from './Odometer';
+import { WinConfetti } from './Confetti';
 import { fadeIn, fadeUp, pop } from './motion';
 import { Button, Card, Display, Label, Paper, T } from './kit';
 import { Avatar, Pips, SeatAvatar } from './Players';
@@ -23,6 +24,7 @@ export function Results() {
   const [earned] = useState(() => progress.get().last);
   useEffect(() => () => progress.clearLast(), []);
   const insets = useSafeAreaInsets();
+  const dims = useWindowDimensions();
   const m = g.match!;
   const casual = !!g.config?.casual;
   const you = m.seats.find((s) => s.kind === 'you')!;
@@ -164,6 +166,8 @@ export function Results() {
           <Button title="Back to Play" variant="ghost" onPress={() => game.exit()} />
         </View>
       </View>
+      {/* Only when you (or your team) won, not after a forfeit. */}
+      {won && !m.forfeitedBy && <WinConfetti width={dims.width} height={dims.height} />}
     </Paper>
   );
 }
