@@ -25,7 +25,7 @@ export function Wordmark({ height = 40 }: { height?: number }) {
 const PINK_HEX = '#FF2E93';
 const ORANGE_HEX = '#EA5B0C';
 
-const D = 2000; // the chips wait 2 s after the screen appears; the name is there from the start
+const D = 1000; // the chips wait 1 s after the screen appears; the name is there from the start
 const POP = Easing.bezier(0.2, 0.9, 0.3, 1);
 const FLIP = Easing.bezier(0.45, 0, 0.25, 1);
 
