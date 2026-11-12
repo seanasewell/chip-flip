@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MODES, cellLabel, isRemoveJack, isWildJack } from '@/core/board';
 import { canSwap, currentSeatId, isDead, seatById, targetsFor, toWin } from '@/core/engine';
 import type { CardId, MatchState, Seat } from '@/core/types';
-import { game, useGame } from '@/lib/game';
+import { DEV_TOOLS, game, useGame } from '@/lib/game';
+import { progress } from '@/lib/progress';
 import { Board } from './Board';
 import { TileFace } from './Cards';
 import { ChipIcon } from './Chip';
@@ -43,7 +44,7 @@ function Table() {
   const { width: W } = useWindowDimensions();
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [reveal, setReveal] = useState(false);
-  const [menu, setMenu] = useState<null | 'menu' | 'rules' | 'forfeit'>(null);
+  const [menu, setMenu] = useState<null | 'menu' | 'rules' | 'forfeit' | 'dev'>(null);
   const cur = seatById(m, currentSeatId(m));
   const viewer = g.viewer ? seatById(m, g.viewer) : null;
   const humans = m.seats.filter((s) => s.kind !== 'bot');
@@ -68,6 +69,7 @@ function Table() {
               {g.config?.casual ? 'Casual · ' : ''}First to {toWin(m)} {toWin(m) === 1 ? 'sequence' : 'sequences'}
             </Label>
           </View>
+          {DEV_TOOLS && <IconButton name="wrench" onPress={() => setMenu('dev')} label="Developer controls" />}
           <SoundButton />
         </View>
 
@@ -308,9 +310,13 @@ function Hint({ top }: { top: number }) {
   );
 }
 
-function MatchMenu({ which, set }: { which: null | 'menu' | 'rules' | 'forfeit'; set: (v: null | 'menu' | 'rules' | 'forfeit') => void }) {
+function MatchMenu({ which, set }: { which: null | 'menu' | 'rules' | 'forfeit' | 'dev'; set: (v: null | 'menu' | 'rules' | 'forfeit' | 'dev') => void }) {
   const casual = !!game.get().config?.casual;
   const s = useSoundSettings();
+  const run = (f: () => void) => {
+    set(null);
+    setTimeout(f, 250);
+  };
   return (
     <>
       <Sheet open={which === 'menu'} onClose={() => set(null)} title="Match menu">
@@ -328,6 +334,22 @@ function MatchMenu({ which, set }: { which: null | 'menu' | 'rules' | 'forfeit';
           right={<Icon name="arrow" size={16} />}
         />
         <Row icon="flag" title="Forfeit match" sub={casual ? 'Ends the match' : 'Counts as a loss'} danger onPress={() => set('forfeit')} />
+      </Sheet>
+      <Sheet open={which === 'dev'} onClose={() => set(null)} title="Developer controls">
+        <T style={{ fontSize: 12.5, color: C.muted, marginBottom: 10, lineHeight: 18 }}>Only in development builds. Card scenarios change your hand right away; ranked results still count, so you can see XP and level-ups.</T>
+        <Label style={{ marginBottom: 8 }}>Your hand</Label>
+        <Row title="Give me a dead card" sub="Both of its spaces get taken" onPress={() => run(game.dev.deadCard)} />
+        <Row title="Give me a wild jack" sub="Two-eyed: place anywhere" onPress={() => run(game.dev.wildJack)} />
+        <Row title="Give me a remove jack" sub="One-eyed, with chips to remove" onPress={() => run(game.dev.removeJack)} />
+        <Label style={{ marginTop: 10, marginBottom: 8 }}>Sequences</Label>
+        <Row title="Set up a sequence" sub="Four in a row and the card for the fifth" onPress={() => run(game.dev.setUpSequence)} />
+        <Row title="One move from winning" sub="Your last sequence is one card away" onPress={() => run(game.dev.winNext)} />
+        <Row title="Opponent about to win" sub="They complete their last sequence next turn" onPress={() => run(game.dev.opponentWinsNext)} />
+        <Label style={{ marginTop: 10, marginBottom: 8 }}>End the match</Label>
+        <Row title="Jump to the win screen" onPress={() => run(() => game.dev.endMatch(true))} />
+        <Row title="Jump to the loss screen" onPress={() => run(() => game.dev.endMatch(false))} />
+        <Label style={{ marginTop: 10, marginBottom: 8 }}>Progress</Label>
+        <Row title="Reset my XP, level and achievements" sub="On this phone" danger onPress={() => run(() => progress.reset())} />
       </Sheet>
       <Sheet open={which === 'rules'} onClose={() => set(null)} title="How to play">
         <RulesList />

@@ -7,10 +7,10 @@ import { useSyncExternalStore } from 'react';
 import { AccessibilityInfo } from 'react-native';
 
 import { chooseAction, chooseBySkill } from '@/core/ai';
-import { MODES, isRemoveJack, isWildJack } from '@/core/board';
-import { canSwap, createMatch, currentSeatId, forfeit, play, seatById, sequenceCount, targetsFor } from '@/core/engine';
+import { MODES, WINDOWS, cellsForCard, isCorner, isJack, isRemoveJack, isWildJack } from '@/core/board';
+import { canSwap, createMatch, currentSeatId, forfeit, lockedCells, play, seatById, sequenceCount, targetsFor, toWin } from '@/core/engine';
 import { randomSeed } from '@/core/rng';
-import type { Action, CardId, Difficulty, GameModeId, MatchState, Seat, Sequence } from '@/core/types';
+import { DECK_SIZE, type Action, type CardId, type Difficulty, type GameModeId, type MatchState, type Seat, type Sequence } from '@/core/types';
 import { gameMusic, haptic, sfx } from '@/ui/sound';
 import { SIDE_COLORS, validColors } from '@/ui/theme';
 import { kv } from './kv';
@@ -398,6 +398,152 @@ class GameController {
     });
   }
 
+
+  // ------------------------------------------------------------ developer controls
+  // Temporary tools for trying rare moments on demand. Shown only in
+  // development builds (Expo Go), never in the store app.
+
+  private devEdit(f: (m: MatchState) => MatchState | null) {
+    const m = this.state.match;
+    if (!m || m.phase !== 'playing' || this.state.view !== 'play') return;
+    const next = f(JSON.parse(JSON.stringify(m)) as MatchState);
+    if (!next) return this.hint('Not possible right now.');
+    this.replace(next, { selected: null });
+  }
+
+  /** Puts `card` in `seatId`'s hand, in place of their first card. */
+  private give(m: MatchState, seatId: string, card: CardId) {
+    const hand = m.hands[seatId];
+    if (hand.includes(card)) return;
+    const out = hand[0];
+    m.hands[seatId] = [card, ...hand.slice(1)];
+    for (const pile of [m.deck, m.discard, ...Object.values(m.hands).filter((h) => h !== m.hands[seatId])]) {
+      const i = pile.indexOf(card);
+      if (i >= 0) {
+        pile[i] = out;
+        return;
+      }
+    }
+  }
+
+  private findCard(m: MatchState, seatId: string, ok: (c: CardId) => boolean): CardId | null {
+    const mine = new Set(m.hands[seatId]);
+    for (const pile of [m.deck, m.discard])
+      for (const c of pile) if (ok(c) && !mine.has(c)) return c;
+    for (let c = 0; c < DECK_SIZE; c++) if (ok(c) && !mine.has(c)) return c;
+    return null;
+  }
+
+  private you(m: MatchState) {
+    return m.seats.find((x) => x.kind === 'you')!;
+  }
+
+  private otherSide(m: MatchState, side: number) {
+    return m.sides.find((x) => x.index !== side)!.index;
+  }
+
+  /** An empty straight line of five (no corners). */
+  private emptyWindow(m: MatchState) {
+    const w = WINDOWS.filter((x) => x.cells.every((c) => !isCorner(c) && m.board[c] === null));
+    return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+  }
+
+  /** Fills in completed sequences for `side` until it has `count`. */
+  private addSequences(m: MatchState, side: number, seat: string, count: number) {
+    while (sequenceCount(m, side) < count) {
+      const w = this.emptyWindow(m);
+      if (!w) return false;
+      w.cells.forEach((c) => (m.board[c] = side));
+      m.sequences.push({ side, cells: w.cells, dir: w.dir, seat });
+    }
+    return true;
+  }
+
+  /** Four in a line with the fifth space open, and the card for it in hand. */
+  private oneAway(m: MatchState, side: number, seatIds: string[]) {
+    const w = this.emptyWindow(m);
+    if (!w) return false;
+    const gap = w.cells[Math.floor(Math.random() * 5)];
+    w.cells.forEach((c) => c !== gap && (m.board[c] = side));
+    const card = this.findCard(m, seatIds[0], (c) => !isJack(c) && cellsForCard(c).includes(gap));
+    if (card == null) return false;
+    seatIds.forEach((id) => this.give(m, id, card));
+    return true;
+  }
+
+  dev = {
+    deadCard: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        const opp = this.otherSide(m, you.side);
+        const locked = lockedCells(m);
+        const card = this.findCard(m, you.id, (c) => !isJack(c) && cellsForCard(c).every((x) => m.board[x] === null || !locked.has(x)));
+        if (card == null) return null;
+        cellsForCard(card).forEach((x) => m.board[x] === null && (m.board[x] = opp));
+        this.give(m, you.id, card);
+        return m;
+      }),
+    wildJack: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        const card = this.findCard(m, you.id, isWildJack);
+        if (card == null) return null;
+        this.give(m, you.id, card);
+        return m;
+      }),
+    removeJack: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        const card = this.findCard(m, you.id, isRemoveJack);
+        if (card == null) return null;
+        this.give(m, you.id, card);
+        // Make sure there's something to remove.
+        if (!targetsFor(m, you.id, card).length) {
+          const opp = this.otherSide(m, you.side);
+          const open = m.board.flatMap((o, c) => (o === null && !isCorner(c) ? [c] : []));
+          open.sort(() => Math.random() - 0.5).slice(0, 3).forEach((c) => (m.board[c] = opp));
+        }
+        return m;
+      }),
+    setUpSequence: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        return this.oneAway(m, you.side, [you.id]) ? m : null;
+      }),
+    winNext: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        if (!this.addSequences(m, you.side, you.id, toWin(m) - 1)) return null;
+        return this.oneAway(m, you.side, [you.id]) ? m : null;
+      }),
+    opponentWinsNext: () =>
+      this.devEdit((m) => {
+        const you = this.you(m);
+        const opp = this.otherSide(m, you.side);
+        const bots = m.sides[opp].seats;
+        if (!this.addSequences(m, opp, bots[0], toWin(m) - 1)) return null;
+        return this.oneAway(m, opp, bots) ? m : null;
+      }),
+    endMatch: (won: boolean) => {
+      const m0 = this.state.match;
+      if (!m0 || m0.phase !== 'playing') return;
+      const m = JSON.parse(JSON.stringify(m0)) as MatchState;
+      const you = this.you(m);
+      const side = won ? you.side : this.otherSide(m, you.side);
+      const seat = won ? you.id : m.sides[side].seats[0];
+      if (!this.addSequences(m, side, seat, toWin(m))) return this.hint('Not possible right now.');
+      const done: MatchState = { ...m, phase: 'over', winnerSide: side, ending: 'sequences', endedAt: Date.now() };
+      if (this.saved) this.saved.youPlaced = true;
+      this.clearTimers();
+      this.replace(done, { busy: false, selected: null, fresh: [], handoff: null });
+      this.record();
+      gameMusic.stop();
+      this.set({ view: 'results' });
+      if (won) sfx.matchWin();
+      else sfx.matchLoss();
+    },
+  };
+
   // ------------------------------------------------------------ results
 
   private record() {
@@ -459,6 +605,9 @@ export function buildSeats(config: SetupConfig, rated: number | null = null): Se
 }
 
 export const game = new GameController();
+
+/** Developer controls show in development builds only. */
+export const DEV_TOOLS = __DEV__ || process.env.EXPO_PUBLIC_DEV_TOOLS === '1';
 
 export function useGame(): GameState {
   return useSyncExternalStore(game.subscribe, game.get, game.get);
