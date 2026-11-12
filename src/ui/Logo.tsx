@@ -2,8 +2,10 @@
 // pop in left to right under the name, the pink and orange chips burst away
 // and blue ones take their place, then all five flip over to crowns.
 import { useEffect } from 'react';
+
+import { PARTICLES, Particle } from './Burst';
 import { Image, View } from 'react-native';
-import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming, type SharedValue } from 'react-native-reanimated';
+import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 const LOGO = require('@/assets/images/logo.png');
 const BLUE = require('@/assets/images/blue.png');
@@ -19,29 +21,8 @@ export function Wordmark({ height = 40 }: { height?: number }) {
 }
 
 // Same timeline and keyframes as the web prototype's welcome logo.
-// Chip dust: a fixed scatter of pieces flying out from the chip's center.
-type Piece = { angle: number; dist: number; size: number; spin: number; light: boolean; lift: number };
-const PARTICLES: Piece[] = Array.from({ length: 18 }, (_, i) => {
-  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
-  return { angle: (i / 18) * Math.PI * 2 + r(1) * 0.5, dist: 0.55 + r(2) * 0.75, size: 0.07 + r(3) * 0.09, spin: (r(4) - 0.5) * 540, light: i % 3 === 0, lift: 0.2 + r(5) * 0.3 };
-});
 const PINK_HEX = '#FF2E93';
 const ORANGE_HEX = '#EA5B0C';
-
-function Particle({ p, t, size, color }: { p: Piece; t: SharedValue<number>; size: number; color: string }) {
-  const s = Math.max(2, Math.round(size * p.size));
-  const style = useAnimatedStyle(() => {
-    const k = Math.max(0, Math.min(1, (t.value - 0.12) / 0.75));
-    const e = 1 - (1 - k) * (1 - k) * (1 - k); // fast out, then drifting
-    const dx = Math.cos(p.angle) * p.dist * size * e;
-    const dy = Math.sin(p.angle) * p.dist * size * e - p.lift * size * e + 0.6 * size * k * k; // up, then falling
-    return {
-      opacity: t.value < 0.12 ? 0 : interpolate(k, [0, 0.55, 1], [1, 0.9, 0], Extrapolation.CLAMP),
-      transform: [{ translateX: dx }, { translateY: dy }, { rotate: `${p.spin * k}deg` }, { scale: interpolate(k, [0, 1], [1, 0.35]) }],
-    };
-  });
-  return <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: size / 2 - s / 2, top: size / 2 - s / 2, width: s, height: s, backgroundColor: p.light ? '#FFFFFF' : color, borderRadius: p.light ? s / 2 : 1 }, style]} />;
-}
 
 const D = 2000; // the chips wait 2 s after the screen appears; the name is there from the start
 const POP = Easing.bezier(0.2, 0.9, 0.3, 1);

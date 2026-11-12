@@ -1,6 +1,6 @@
 // The 10×10 board. Each space is memoized, so a move only redraws the
 // spaces it changes.
-import { memo } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -8,6 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import { cellLabel, isCorner } from '@/core/board';
 import { BOARD_SIZE, type CellOwner, type Move, type Sequence } from '@/core/types';
 import { FLIP_STAGGER, FLIP_START } from '@/lib/game';
+import { ChipBurst } from './Burst';
 import { Chip } from './Chip';
 import { TileFace } from './Cards';
 import { Icon } from './icons';
@@ -95,6 +96,22 @@ const Cell = memo(function Cell({ i, cell, owner, locked, flipDelay, target, dim
 });
 
 export function Board({ board, size, sequences, fresh = [], lastMove = null, targets, targetKind, activeSide, onTap, sideNames = [], reveal = false }: BoardProps) {
+  // A chip taken off with a one-eyed jack bursts into dust where it stood.
+  // Drawn over the whole board so the dust can fly across neighboring spaces.
+  const prev = useRef(board);
+  const [bursts, setBursts] = useState<{ cell: number; side: number; key: number }[]>([]);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = board;
+    const gone = board.flatMap((o, c) => (o === null && was[c] !== null && was[c] !== undefined ? [{ cell: c, side: was[c] as number, key: Date.now() + c }] : []));
+    if (!gone.length) return;
+    // Timers aren't cancelled when the board changes again (the next move can
+    // come before the dust settles); they only stop if the board goes away.
+    timers.current.push(setTimeout(() => setBursts((b) => [...b, ...gone]), 0));
+    timers.current.push(setTimeout(() => setBursts((b) => b.filter((x) => !gone.some((g) => g.key === x.key))), 1000));
+  }, [board]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
   if (!size) return null;
   const pad = Math.max(4, Math.round(size * 0.016));
   const gap = Math.max(2, Math.round(size * 0.008));
@@ -150,6 +167,16 @@ export function Board({ board, size, sequences, fresh = [], lastMove = null, tar
     <View style={{ width: size + 5, height: size + 5 }} accessibilityLabel="Board">
       <View style={{ position: 'absolute', left: 5, top: 5, width: size, height: size, backgroundColor: C.blue }} />
       <View style={{ width: size, height: size, padding: pad, backgroundColor: C.ink, gap }}>{rows}</View>
+      {!reveal &&
+        bursts.map((b) => {
+          const r = Math.floor(b.cell / BOARD_SIZE);
+          const c = b.cell % BOARD_SIZE;
+          return (
+            <View key={b.key} pointerEvents="none" style={{ position: 'absolute', left: pad + c * (cell + gap), top: pad + r * (cell + gap), width: cell, height: cell }}>
+              <ChipBurst side={b.side} size={cell * 0.84} />
+            </View>
+          );
+        })}
     </View>
   );
 }
