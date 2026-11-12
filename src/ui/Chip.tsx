@@ -68,13 +68,12 @@ export const Chip = memo(function Chip({ side, size, locked = false, flipDelay =
   useEffect(() => {
     const to = locked ? 1 : 0;
     if (p.value === to) return;
-    const settle = () => {
-      setRestCrown(locked);
-      setTurning(false);
-    };
+    // Once a chip has turned it keeps the coin drawing, so nothing is
+    // swapped (and redrawn) at the moment it lands.
+    const settle = () => setRestCrown(locked);
     p.value = withDelay(
       flipDelay,
-      withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.3, 1.25, 0.5, 1) }, (done) => {
+      withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.6, 0, 0.3, 1) }, (done) => {
         if (done) scheduleOnRN(settle);
       }),
     );

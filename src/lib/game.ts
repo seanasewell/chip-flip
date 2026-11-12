@@ -67,7 +67,7 @@ export const FLIP_START = 480;
 export const FLIP_STAGGER = 220;
 export const FLIP_MS = 1100;
 const FLIP_DONE = FLIP_START + 4 * FLIP_STAGGER + FLIP_MS + 60;
-const TIMING = { intro: 3400, land: 380, bot: [700, 1200] as [number, number], seqHold: FLIP_DONE + 500, endHold: 1900 };
+const TIMING = { intro: 3400, land: 380, bot: [700, 1200] as [number, number], seqHold: FLIP_DONE + 500, endHold: 1900, winHold: 1700 + 2000 };
 
 const MATCH_KEY = 'cf.match';
 const RATING_KEY = 'cf.rating';
@@ -390,7 +390,9 @@ class GameController {
     this.record();
     const won = next.winnerSide === youSide;
     if (madeSeq) this.after(FLIP_DONE, cheer);
-    this.after(madeSeq ? FLIP_DONE + 900 : TIMING.endHold, () => {
+    // After a winning line: let the chips flip and the confetti fall, then
+    // hold a couple of seconds before the results.
+    this.after(madeSeq ? FLIP_DONE + TIMING.winHold : TIMING.endHold, () => {
       gameMusic.stop();
       this.set({ busy: false, view: 'results' });
       if (won) sfx.matchWin();

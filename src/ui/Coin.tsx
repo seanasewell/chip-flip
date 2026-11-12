@@ -15,7 +15,8 @@ export function FlipCoin({ p, size, front, back, edge, outline = INK }: { p: Sha
 
   const lift = useAnimatedStyle(() => {
     const s = Math.max(0, Math.sin(p.value * Math.PI));
-    return { transform: [{ translateY: -size * 0.1 * s }, { scale: 1 + 0.12 * s }] };
+    // Rises instead of growing: scaling a drawing up blurs it.
+    return { transform: [{ translateY: -size * 0.16 * s }] };
   });
   const shadow = useAnimatedStyle(() => {
     const s = Math.max(0, Math.sin(p.value * Math.PI));
@@ -69,7 +70,7 @@ function Slice({ t, p, size, thick, grow, color }: { t: number; p: SharedValue<n
     // the chip lies flat (the face covers it).
     const w = Math.max(2, Math.abs(Math.cos(a)) * size + grow * 2);
     return {
-      opacity: Math.abs(s) > 0.03 ? 1 : 0,
+      opacity: Math.min(1, Math.abs(s) / 0.08),
       transform: [{ translateX: t * thick * s }, { scaleX: w / h }],
     };
   });
@@ -82,7 +83,7 @@ function Band({ p, size, thick, widen, top, color }: { p: SharedValue<number>; s
   const style = useAnimatedStyle(() => {
     const s = Math.abs(Math.sin(p.value * Math.PI));
     const w = thick * s + widen * 2;
-    return { opacity: s > 0.03 ? 1 : 0, width: w, left: size / 2 - w / 2 };
+    return { opacity: Math.min(1, s / 0.08), width: w, left: size / 2 - w / 2 };
   });
   return <Animated.View style={[{ position: 'absolute', top, height: size - top * 2, backgroundColor: color, borderRadius: Math.max(1, size * 0.05) }, style]} />;
 }
