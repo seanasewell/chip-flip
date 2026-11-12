@@ -105,8 +105,8 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
                 const isToday = k === today;
                 return (
                   <View key={k} style={{ alignItems: 'center', gap: 6 }}>
-                    <View style={{ width: 34, height: 34, borderRadius: 17, borderWidth: isToday ? 2.5 : 1.5, borderColor: isToday ? C.blue : 'rgba(17,17,17,0.25)', backgroundColor: played ? C.blue : C.white, alignItems: 'center', justifyContent: 'center' }}>
-                      {played && <Icon name="check" size={16} color={C.white} />}
+                    <View style={{ width: 34, height: 34, borderRadius: 17, borderWidth: isToday ? 2.5 : 1.5, borderColor: isToday ? C.blue : 'rgba(17,17,17,0.25)', backgroundColor: C.white, alignItems: 'center', justifyContent: 'center' }}>
+                      {played && <Text style={{ fontSize: 17, lineHeight: 22 }}>🔥</Text>}
                     </View>
                     <Label style={{ fontSize: 9.5, opacity: isToday ? 1 : 0.6 }}>{'MTWTFSS'[i]}</Label>
                   </View>
