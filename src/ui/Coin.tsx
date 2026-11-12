@@ -1,72 +1,88 @@
-// A chip that flips like a real coin: it lifts, turns in 3D showing its
-// thick edge, catches the light at the turn, and drops back down.
+// A chip that flips like a thick poker chip. The turn is drawn in 2D with
+// the chip's real geometry, so nothing depends on how a phone renders 3D:
+// as it turns, the face narrows and slides to one side and the rim (the
+// chip's thickness) comes into view, outlined in ink like the rest of the
+// art. Lifts a little with a soft shadow at the middle of the turn.
 import { View } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 
-const EDGE_LAYERS = 6;
+const SLICES = 10;
+const INK = '#111111';
 
-export function FlipCoin({ p, size, front, back, edge }: { p: SharedValue<number>; size: number; front: React.ReactNode; back: React.ReactNode; edge: string }) {
-  const thick = Math.max(3, size * 0.13);
+export function FlipCoin({ p, size, front, back, edge, outline = INK }: { p: SharedValue<number>; size: number; front: React.ReactNode; back: React.ReactNode; edge: string; /** Rim outline (ink for board chips; the logo's chips have none). */ outline?: string }) {
+  const thick = Math.max(4, size * 0.24);
+  const bw = Math.max(1.5, size * 0.06);
 
-  // Lift and shadow: highest (and the shadow widest and softest) mid-flip.
   const lift = useAnimatedStyle(() => {
     const s = Math.max(0, Math.sin(p.value * Math.PI));
-    return { transform: [{ translateY: -size * 0.12 * s }, { scale: 1 + 0.16 * s }] };
+    return { transform: [{ translateY: -size * 0.1 * s }, { scale: 1 + 0.12 * s }] };
   });
   const shadow = useAnimatedStyle(() => {
     const s = Math.max(0, Math.sin(p.value * Math.PI));
-    return { opacity: 0.22 * s, transform: [{ scaleX: 0.7 + 0.25 * Math.abs(Math.cos(p.value * Math.PI)) + 0.2 * s }] };
+    return { opacity: 0.18 * s };
   });
 
-  // Faces turn in perspective, each shifted to its side of the coin's thickness.
-  const frontStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: (thick / 2) * Math.sin(p.value * Math.PI) }, { perspective: size * 5 }, { rotateY: `${p.value * 180}deg` }],
-  }));
-  const backStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: -(thick / 2) * Math.sin(p.value * Math.PI) }, { perspective: size * 5 }, { rotateY: `${180 + p.value * 180}deg` }],
-  }));
-
-  // The edge: a solid band as wide as the coin is thick (seen side-on), with
-  // the rims of each layer drawn as narrowing discs.
-  const band = useAnimatedStyle(() => {
-    const s = Math.abs(Math.sin(p.value * Math.PI));
-    return { opacity: s > 0.02 ? 1 : 0, width: thick * s, left: size / 2 - (thick * s) / 2 };
+  // Front face sits at +thick/2, back face at -thick/2; turning by angle a
+  // moves them to x = ±(thick/2)·sin a and narrows them to |cos a|.
+  const frontStyle = useAnimatedStyle(() => {
+    const a = p.value * Math.PI;
+    const c = Math.cos(a);
+    return { opacity: c > 0 ? 1 : 0, transform: [{ translateX: (thick / 2) * Math.sin(a) }, { scaleX: Math.max(0.001, Math.abs(c)) }] };
   });
-  const layers = Array.from({ length: EDGE_LAYERS }, (_, k) => k);
+  const backStyle = useAnimatedStyle(() => {
+    const a = p.value * Math.PI;
+    const c = Math.cos(a);
+    return { opacity: c <= 0 ? 1 : 0, transform: [{ translateX: -(thick / 2) * Math.sin(a) }, { scaleX: Math.max(0.001, Math.abs(c)) }] };
+  });
 
-  // Light catches the face as it turns toward you.
-  const sheen = useAnimatedStyle(() => ({ opacity: 0.35 * Math.max(0, Math.sin(p.value * Math.PI)) }));
-
+  const slices = Array.from({ length: SLICES }, (_, k) => k / (SLICES - 1) - 0.5);
   return (
     <View style={{ width: size, height: size }}>
-      <Animated.View style={[{ position: 'absolute', left: size * 0.08, right: size * 0.08, bottom: -size * 0.1, height: size * 0.16, borderRadius: size, backgroundColor: '#111111' }, shadow]} />
+      <Animated.View style={[{ position: 'absolute', left: size * 0.1, right: size * 0.1, bottom: -size * 0.12, height: size * 0.14, borderRadius: size, backgroundColor: INK }, shadow]} />
       <Animated.View style={[{ position: 'absolute', width: size, height: size }, lift]}>
-        {layers.map((k) => (
-          <EdgeDisc key={k} k={k} p={p} size={size} thick={thick} color={edge} />
+        {/* Ink silhouette first, then the rim color inset by the outline
+            width: the whole chip, rim included, gets one clean outline the
+            same size as the face's own. */}
+        {slices.map((t, k) => (
+          <Slice key={`o${k}`} t={t} p={p} size={size} thick={thick} grow={0} color={outline} />
         ))}
-        <Animated.View style={[{ position: 'absolute', top: size * 0.06, height: size * 0.88, backgroundColor: edge, borderRadius: 2 }, band]} />
-        <Animated.View style={[{ position: 'absolute', width: size, height: size, backfaceVisibility: 'hidden' }, frontStyle]}>
-          {front}
-          <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: '#FFFFFF' }, sheen]} />
-        </Animated.View>
-        <Animated.View style={[{ position: 'absolute', width: size, height: size, backfaceVisibility: 'hidden' }, backStyle]}>
-          {back}
-          <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: '#FFFFFF' }, sheen]} />
-        </Animated.View>
+        <Band p={p} size={size} thick={thick} widen={bw} top={0} color={outline} />
+        {slices.map((t, k) => (
+          <Slice key={`e${k}`} t={t} p={p} size={size} thick={thick} grow={-bw} color={edge} />
+        ))}
+        <Band p={p} size={size} thick={thick} widen={0} top={bw} color={edge} />
+        <Animated.View style={[{ position: 'absolute', width: size, height: size }, backStyle]}>{back}</Animated.View>
+        <Animated.View style={[{ position: 'absolute', width: size, height: size }, frontStyle]}>{front}</Animated.View>
       </Animated.View>
     </View>
   );
 }
 
-function EdgeDisc({ k, p, size, thick, color }: { k: number; p: SharedValue<number>; size: number; thick: number; color: string }) {
+/** One slice of the chip's thickness, as seen at the current angle. */
+function Slice({ t, p, size, thick, grow, color }: { t: number; p: SharedValue<number>; size: number; thick: number; grow: number; color: string }) {
+  const h = size + grow * 2;
   const style = useAnimatedStyle(() => {
     const a = p.value * Math.PI;
     const s = Math.sin(a);
-    const offset = (k / (EDGE_LAYERS - 1) - 0.5) * thick * s;
+    // A circle squeezed to the chip's current width (an ellipse, matching
+    // the face exactly), slid to its place across the thickness. Hidden when
+    // the chip lies flat (the face covers it).
+    const w = Math.max(2, Math.abs(Math.cos(a)) * size + grow * 2);
     return {
-      opacity: Math.abs(s) > 0.02 ? 1 : 0,
-      transform: [{ translateX: offset }, { scaleX: Math.max(0.001, Math.abs(Math.cos(a))) }],
+      opacity: Math.abs(s) > 0.03 ? 1 : 0,
+      transform: [{ translateX: t * thick * s }, { scaleX: w / h }],
     };
   });
-  return <Animated.View style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color, borderWidth: 1, borderColor: '#111111' }, style]} />;
+  return <Animated.View style={[{ position: 'absolute', top: -grow, left: -grow, width: h, height: h, borderRadius: h / 2, backgroundColor: color }, style]} />;
+}
+
+/** The straight part of the rim between the two faces (solid, so the rim
+ *  reads as one surface rather than stacked slices). */
+function Band({ p, size, thick, widen, top, color }: { p: SharedValue<number>; size: number; thick: number; widen: number; top: number; color: string }) {
+  const style = useAnimatedStyle(() => {
+    const s = Math.abs(Math.sin(p.value * Math.PI));
+    const w = thick * s + widen * 2;
+    return { opacity: s > 0.03 ? 1 : 0, width: w, left: size / 2 - w / 2 };
+  });
+  return <Animated.View style={[{ position: 'absolute', top, height: size - top * 2, backgroundColor: color, borderRadius: Math.max(1, size * 0.05) }, style]} />;
 }

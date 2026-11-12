@@ -64,7 +64,7 @@ export function HandCard({ card, width, state, onPress, fresh = false, dead: dea
   return (
     <Animated.View style={style}>
       {fresh && (
-        <View pointerEvents="none" style={{ position: 'absolute', top: -9, left: 0, right: 0, alignItems: 'center', zIndex: 2 }}>
+        <View pointerEvents="none" style={{ position: 'absolute', top: -12, left: 0, right: 0, alignItems: 'center', zIndex: 2 }}>
           <Animated.View entering={tagPop} style={{ backgroundColor: C.green, borderWidth: 1.5, borderColor: C.ink, paddingHorizontal: 5 }}>
             <Text style={{ fontFamily: F.monoBold, fontSize: 8.5, color: C.ink, textTransform: 'uppercase' }}>New</Text>
           </Animated.View>

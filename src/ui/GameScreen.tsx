@@ -56,7 +56,9 @@ function Table() {
   const lastMove = m.moves[m.moves.length - 1] ?? null;
   const left = m.deck.length;
   // Largest square board that fits (title bar 26, shadow 5, borders 4).
-  const size = Math.floor(Math.max(0, Math.min(box.w - 13, box.h - 26 - 13, 560)));
+  // The play-by-play line needs its height plus some breathing room.
+  const PLAY_H = 46 + 20;
+  const size = Math.floor(Math.max(0, Math.min(box.w - 13, box.h - 26 - 13 - PLAY_H, 560)));
 
   return (
     <Paper>
@@ -77,7 +79,7 @@ function Table() {
           <PlayerStrip m={m} activeId={m.phase === 'playing' ? cur.id : null} />
         </View>
 
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 8 }} onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
+        <View style={{ flex: 1, alignItems: 'center', marginTop: 10 }} onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
           {size > 0 && (
             <View style={{ width: size + 4 + 5 }}>
               <View style={{ borderWidth: 2, borderColor: C.ink, borderBottomWidth: 0, backgroundColor: C.paper, height: 26, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 8, marginRight: 5 }}>
@@ -103,9 +105,11 @@ function Table() {
               </View>
             </View>
           )}
+          {/* Play-by-play: centered in the space between the board and your cards. */}
+          <View style={{ flex: 1, width: '100%', justifyContent: 'center' }}>
+            <LastPlay m={m} />
+          </View>
         </View>
-
-        <LastPlay m={m} />
 
         <HandArea m={m} seat={handSeat} myTurn={myTurn} selected={g.selected} reveal={reveal} onReveal={() => setReveal((v) => !v)} width={Math.min(W, 580)} bottom={insets.bottom} />
       </View>
@@ -189,7 +193,7 @@ function HandArea({ m, seat, myTurn, selected, reveal, onReveal, width, bottom }
 
   return (
     <View style={{ paddingBottom: Math.max(bottom, 8) }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap, paddingTop: 16, minHeight: cardW * 1.4 + 22 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap, paddingTop: 14, minHeight: cardW * 1.4 + 18 }}>
         {seat
           ? hand.map((card) => {
               const state: CardState = !myTurn ? 'disabled' : selected === card ? 'selected' : isDead(m, card) ? 'dead' : 'available';
@@ -381,7 +385,7 @@ function LastPlay({ m }: { m: MatchState }) {
   const H = 46;
   if (!show) {
     return (
-      <View style={{ height: H, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ height: H, alignItems: 'center', justifyContent: 'center' }}>
         <Label style={{ fontSize: 9.5, opacity: 0.55 }}>No plays yet</Label>
       </View>
     );
@@ -402,14 +406,14 @@ function LastPlay({ m }: { m: MatchState }) {
   else text = `${who} placed a chip on the ${place}`;
   if (show.newSequences > 0) text += show.newSequences > 1 ? ' and completed two sequences!' : ' and completed a sequence!';
   return (
-    <Animated.View key={show.n} entering={fadeUp(0, 300)} style={{ height: H, marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 }} accessibilityLiveRegion="polite">
+    <Animated.View key={show.n} entering={fadeUp(0, 300)} style={{ height: H, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 4 }} accessibilityLiveRegion="polite">
       <View style={{ width: H - 6, height: H - 6, borderWidth: 2, borderColor: C.ink, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' }}>
         {cellOf != null ? <TileFace cell={cellOf} size={H - 10} /> : <Icon name="arrow" size={16} />}
         <View style={{ position: 'absolute', right: -6, bottom: -6 }}>
           <ChipIcon color={sideColor(show.side)} size={18} mark={0.5} />
         </View>
       </View>
-      <T numberOfLines={2} style={{ flex: 1, fontSize: 13.5, lineHeight: 18 }}>
+      <T numberOfLines={2} style={{ flexShrink: 1, fontSize: 13.5, lineHeight: 18 }}>
         <T style={{ fontFamily: F.bodyBold, fontSize: 13.5 }}>{who}</T>
         {text.slice(who.length)}
       </T>

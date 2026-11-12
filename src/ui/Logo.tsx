@@ -77,6 +77,7 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
         p={flip}
         size={size}
         edge="#1F3AD6"
+        outline="#1F3AD6"
         front={
           <>
         {swaps ? (
