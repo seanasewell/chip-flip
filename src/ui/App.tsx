@@ -7,6 +7,7 @@ import type { GameModeId } from '@/core/types';
 import { useGame } from '@/lib/game';
 import { progress } from '@/lib/progress';
 import { useProfile } from '@/lib/profile';
+import { Friends } from './Friends';
 import { GameScreen } from './GameScreen';
 import { Home } from './Home';
 import { Profile, Settings } from './Profile';
@@ -17,7 +18,7 @@ import { TabBar, type Tab } from './Tabs';
 import { TutorialGate } from './Tutorial';
 import { Welcome } from './Welcome';
 
-type Page = { name: 'setup'; mode: GameModeId } | { name: 'settings' };
+type Page = { name: 'setup'; mode: GameModeId } | { name: 'settings' } | { name: 'friends' };
 
 /** Screen flow: welcome on first launch, then the tabs, with setup and
  *  settings as pages on top, and matches full screen. */
@@ -66,6 +67,10 @@ export function ChipFlipApp() {
   } else if (page?.name === 'setup') {
     key = `setup-${page.mode}`;
     screen = <Setup mode={page.mode} onBack={() => setPage(null)} />;
+  } else if (page?.name === 'friends') {
+    tabs = true;
+    key = 'friends';
+    screen = <Friends onBack={() => setPage(null)} />;
   } else if (page?.name === 'settings') {
     tabs = true;
     key = 'settings';
@@ -81,7 +86,7 @@ export function ChipFlipApp() {
       ) : tab === 'rewards' ? (
         <Rewards />
       ) : (
-        <Profile onSettings={() => setPage({ name: 'settings' })} onAchievements={() => openTab('rewards')} />
+        <Profile onSettings={() => setPage({ name: 'settings' })} onAchievements={() => openTab('rewards')} onFriends={() => setPage({ name: 'friends' })} />
       );
   }
   return (

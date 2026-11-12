@@ -13,6 +13,7 @@ import { Odometer } from './Odometer';
 import { WinConfetti } from './Confetti';
 import { fadeIn, fadeUp, pop } from './motion';
 import { Button, Card, Display, Label, Paper, T } from './kit';
+import { ChipIcon } from './Chip';
 import { Avatar, Pips, SeatAvatar } from './Players';
 import { C, F, sideColor } from './theme';
 
@@ -121,14 +122,18 @@ export function Results() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderColor: C.ink, backgroundColor: C.white, paddingHorizontal: 12, paddingVertical: 8 }}>
                   <View style={{ flexDirection: 'row' }}>
                     {seats.map((x, k) => (
-                      <View key={x.id} style={{ marginLeft: k ? -8 : 0 }}>
-                        <SeatAvatar seat={x} size={26} />
+                      <View key={x.id} style={{ marginLeft: k ? -12 : 0 }}>
+                        <SeatAvatar seat={x} size={28} badge={false} />
                       </View>
                     ))}
                   </View>
-                  <T numberOfLines={1} style={{ flex: 1, fontFamily: F.bodyMed, fontSize: 14 }}>
-                    {teams ? `${s.name} · ${seats.map(nameOf).join(' & ')}` : nameOf(seats[0])}
-                  </T>
+                  {/* The side's chip stands in for "Team pink" etc. */}
+                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <ChipIcon color={sideColor(s.index)} size={18} mark={0.55} />
+                    <T numberOfLines={1} style={{ flexShrink: 1, fontFamily: F.bodyMed, fontSize: 14 }}>
+                      {seats.map(nameOf).join(' & ')}
+                    </T>
+                  </View>
                   {s.index === winSide.index && <T style={{ fontFamily: F.bodyBold, fontSize: 12, color: C.greenText }}>Winner</T>}
                   <Pips count={seq(s.index)} total={toWin(m)} side={s.index} size={7} />
                 </View>

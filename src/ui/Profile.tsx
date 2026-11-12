@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { game } from '@/lib/game';
 import { ACHIEVEMENTS, XP_WAYS, dayKey, levelOf, levelTitle, progress, useProgress, weekStart, winPct, xpForLevel } from '@/lib/progress';
+import { friends, useFriends } from '@/lib/friends';
 import { profile, useProfile } from '@/lib/profile';
 import { Bar } from './Bar';
 import { useSoundSettings } from './GameScreen';
@@ -16,6 +17,28 @@ import { PROVIDER_NAME, ProviderButtons } from './SignIn';
 import { PageHeader } from './Tabs';
 import { tutorial } from './Tutorial';
 import { anton, C, F } from './theme';
+
+/** "N friends ›" under your name; a dot when someone wants to be friends. */
+function FriendsPill({ onPress }: { onPress: () => void }) {
+  const { online } = useProfile();
+  const f = useFriends();
+  useEffect(() => {
+    if (online === 'on') void friends.refresh();
+  }, [online]);
+  const n = f.list.filter((x) => x.kind === 'friend').length;
+  const asks = f.list.filter((x) => x.kind === 'incoming').length;
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${n} friends${asks ? `, ${asks} requests` : ''}`} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, height: 34, borderRadius: 17, backgroundColor: 'rgba(17,17,17,0.08)', opacity: pressed ? 0.7 : 1 })}>
+      <T style={{ fontSize: 13.5 }}>{f.ready ? `${n} ${n === 1 ? 'friend' : 'friends'}` : 'Friends'}</T>
+      {asks > 0 && (
+        <View style={{ minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 5, backgroundColor: C.pink, alignItems: 'center', justifyContent: 'center' }}>
+          <T style={{ color: C.white, fontSize: 11, fontFamily: F.bodyBold }}>{asks}</T>
+        </View>
+      )}
+      <T style={{ fontSize: 13.5, color: C.muted }}>›</T>
+    </Pressable>
+  );
+}
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -52,7 +75,7 @@ export function XpSheet({ open, onClose }: { open: boolean; onClose: () => void 
   );
 }
 
-export function Profile({ onSettings, onAchievements }: { onSettings: () => void; onAchievements: () => void }) {
+export function Profile({ onSettings, onAchievements, onFriends }: { onSettings: () => void; onAchievements: () => void; onFriends: () => void }) {
   const insets = useSafeAreaInsets();
   const { profile: me } = useProfile();
   const p = useProgress();
@@ -76,6 +99,7 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
         <View style={{ alignItems: 'center', gap: 8 }}>
           <Avatar glyph={(me?.name[0] ?? 'Y').toUpperCase()} hue={230} size={92} you />
           <Display size={26}>{me?.name ?? 'You'}</Display>
+          <FriendsPill onPress={onFriends} />
         </View>
 
         <Card accent={C.blue}>
