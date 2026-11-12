@@ -106,7 +106,7 @@ function Table() {
             </View>
           )}
           {/* Play-by-play: centered in the space between the board and your cards. */}
-          <View style={{ flex: 1, width: '100%', justifyContent: 'center' }}>
+          <View style={{ flex: 1, width: '100%', justifyContent: 'center', transform: [{ translateY: -2 }] }}>
             <LastPlay m={m} />
           </View>
         </View>
@@ -192,7 +192,7 @@ function HandArea({ m, seat, myTurn, selected, reveal, onReveal, width, bottom }
   const isFresh = (c: CardId) => !!seat && myTurn && fresh?.seat === seat.id && fresh.cards.includes(c);
 
   return (
-    <View style={{ paddingBottom: Math.max(bottom, 8) }}>
+    <View style={{ paddingBottom: Math.max(bottom, 8) + 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap, paddingTop: 14, minHeight: cardW * 1.4 + 18 }}>
         {seat
           ? hand.map((card) => {
