@@ -156,7 +156,7 @@ export function Results() {
           {won && !m.forfeitedBy && (
             <Button
               title="Share your win"
-              variant="dark"
+              variant="blue"
               onPress={() => Share.share({ message: `I just won a ${MODES[m.mode].name.toLowerCase()} match of Chip Flip${two ? ` ${seq(you.side)}–${seq(1 - you.side)}` : ''} 🏆 Think you can flip more chips than me?` }).catch(() => {})}
             />
           )}

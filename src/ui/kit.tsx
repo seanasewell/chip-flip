@@ -76,11 +76,11 @@ export function Card({ children, style, shadow = C.ink, offset = 4, bg = C.paper
   );
 }
 
-type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'dark';
+type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'dark' | 'blue';
 
 export function Button({ title, onPress, variant = 'primary', disabled = false, icon, style, height = 52 }: { title: string; onPress?: () => void; variant?: ButtonVariant; disabled?: boolean; icon?: IconName; style?: StyleProp<ViewStyle>; height?: number }) {
-  const bg = variant === 'primary' ? C.green : variant === 'danger' ? C.red : variant === 'dark' ? C.ink : C.paper;
-  const fg = variant === 'danger' || variant === 'dark' ? C.paper : C.ink;
+  const bg = variant === 'primary' ? C.green : variant === 'danger' ? C.red : variant === 'dark' ? C.ink : variant === 'blue' ? C.blue : C.paper;
+  const fg = variant === 'danger' || variant === 'dark' ? C.paper : variant === 'blue' ? C.white : C.ink;
   return (
     <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" accessibilityState={{ disabled }} style={[{ opacity: disabled ? 0.45 : 1 }, style]}>
       {({ pressed }) => (
