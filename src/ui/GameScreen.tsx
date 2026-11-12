@@ -105,8 +105,8 @@ function Table() {
               </View>
             </View>
           )}
-          {/* Play-by-play: centered in the space between the board and your cards. */}
-          <View style={{ flex: 1, width: '100%', justifyContent: 'center', transform: [{ translateY: -2 }] }}>
+          {/* Play-by-play: in the space between the board and your cards, nudged toward the cards. */}
+          <View style={{ flex: 1, width: '100%', justifyContent: 'center', transform: [{ translateY: 6 }] }}>
             <LastPlay m={m} />
           </View>
         </View>
