@@ -67,18 +67,18 @@ export function SequenceConfetti({ a, b, cell, delay }: { a: { x: number; y: num
 
 // Full-screen confetti for a match win: pops out from the top edge, then
 // rains down the whole screen, swaying and spinning.
-const RAIN = 90;
+const RAIN = 180;
 type Drop = { x: number; vx: number; up: number; spin: number; w: number; h: number; color: string; round: boolean; delay: number; sway: number; fall: number };
 const DROPS: Drop[] = Array.from({ length: RAIN }, (_, i) => ({
   x: rand(i, 11),
   vx: (rand(i, 12) - 0.5) * 0.5,
-  up: 0.06 + rand(i, 13) * 0.12,
+  up: 0.08 + rand(i, 13) * 0.18,
   spin: (rand(i, 14) - 0.5) * 1440,
   w: 7 + rand(i, 15) * 6,
   h: 4 + rand(i, 16) * 4,
   color: COLORS[i % COLORS.length],
   round: i % 6 === 0,
-  delay: rand(i, 17) * 0.25,
+  delay: rand(i, 17) * 0.4, // keeps coming for a while
   sway: 8 + rand(i, 18) * 18,
   fall: 0.85 + rand(i, 19) * 0.35,
 }));
@@ -101,7 +101,7 @@ function DropBit({ d, t, W, H }: { d: Drop; t: SharedValue<number>; W: number; H
 export function WinConfetti({ width, height, delay = 250 }: { width: number; height: number; delay?: number }) {
   const t = useSharedValue(0);
   useEffect(() => {
-    t.value = withDelay(delay, withTiming(1, { duration: 3600, easing: Easing.linear }));
+    t.value = withDelay(delay, withTiming(1, { duration: 4600, easing: Easing.linear }));
   }, [delay, t]);
   return (
     <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: 0, height: 0, zIndex: 50 }}>

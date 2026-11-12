@@ -39,6 +39,19 @@ const listeners = new Set<() => void>();
 let music: AudioPlayer | null = null;
 let musicKey: string | null = null;
 let appActive = true;
+// Results music: a short win or loss tune when the results screen opens.
+const STINGS = { win: require('@/assets/sounds/win.mp3'), loss: require('@/assets/sounds/loss.mp3') } as const;
+const stingPlayers = new Map<keyof typeof STINGS, AudioPlayer>();
+
+function stopSting() {
+  stingPlayers.forEach((p) => {
+    try {
+      p.pause();
+    } catch {
+      /* ignore */
+    }
+  });
+}
 
 export const soundEnabled = () => kv.get(SOUND_KEY) !== 'off';
 export const musicEnabled = () => kv.get(MUSIC_KEY) !== 'off';
@@ -60,7 +73,10 @@ export function setSoundEnabled(on: boolean) {
 export function setMusicEnabled(on: boolean) {
   kv.set(MUSIC_KEY, on ? 'on' : 'off');
   emit();
-  if (!on) music?.pause();
+  if (!on) {
+    music?.pause();
+    stopSting();
+  }
   else if (musicKey && appActive) startMusic();
 }
 
@@ -70,7 +86,10 @@ export function initSound() {
   (Object.keys(SOURCES) as Name[]).forEach((n) => player(n));
   AppState.addEventListener('change', (s) => {
     appActive = s === 'active';
-    if (!appActive) music?.pause();
+    if (!appActive) {
+      music?.pause();
+      stopSting();
+    }
     else if (musicKey && musicEnabled()) startMusic();
   });
 }
@@ -118,6 +137,7 @@ function startMusic() {
  *  when the same match resumes. */
 export const gameMusic = {
   play(key: string) {
+    stopSting();
     const fresh = key !== musicKey;
     musicKey = key;
     if (!musicEnabled() || !appActive) return;
@@ -133,8 +153,27 @@ export const gameMusic = {
   stop() {
     musicKey = null;
     music?.pause();
+    stopSting();
   },
 };
+
+/** The win or loss tune for the results screen (follows the music setting). */
+export function resultsMusic(kind: keyof typeof STINGS) {
+  stopSting();
+  if (!musicEnabled() || !appActive) return;
+  try {
+    let p = stingPlayers.get(kind);
+    if (!p) {
+      p = createAudioPlayer(STINGS[kind]);
+      p.volume = MUSIC_VOLUME;
+      stingPlayers.set(kind, p);
+    }
+    p.seekTo(0);
+    p.play();
+  } catch {
+    /* audio unavailable */
+  }
+}
 
 export const sfx = {
   select: () => play('select'),

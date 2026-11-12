@@ -14,6 +14,7 @@ import { Ranks } from './Ranks';
 import { Rewards } from './Rewards';
 import { Setup } from './Setup';
 import { TabBar, type Tab } from './Tabs';
+import { TutorialGate } from './Tutorial';
 import { Welcome } from './Welcome';
 
 type Page = { name: 'setup'; mode: GameModeId } | { name: 'settings' };
@@ -25,6 +26,16 @@ export function ChipFlipApp() {
   const g = useGame();
   const [tab, setTab] = useState<Tab>('play');
   const [page, setPage] = useState<Page | null>(null);
+
+  // Whoever signs in (or starts as a guest) lands on the Play tab, never on
+  // the tab the previous player left open.
+  const uid = profile?.id ?? null;
+  const [lastUid, setLastUid] = useState(uid);
+  if (uid !== lastUid) {
+    setLastUid(uid);
+    setTab('play');
+    setPage(null);
+  }
 
   // Android back button closes a page.
   useEffect(() => {
@@ -78,6 +89,7 @@ export function ChipFlipApp() {
       <Animated.View key={key} entering={fadeIn()} style={{ flex: 1 }}>
         {screen}
       </Animated.View>
+      {tabs && profile && <TutorialGate playerId={profile.id} onPlay={() => setPage({ name: 'setup', mode: 'h2h' })} />}
       {tabs && (
         <TabBar
           tab={tab}

@@ -14,6 +14,7 @@ import { Avatar } from './Players';
 import { RulesList } from './Rules';
 import { PROVIDER_NAME, ProviderButtons } from './SignIn';
 import { PageHeader } from './Tabs';
+import { tutorial } from './Tutorial';
 import { anton, C, F } from './theme';
 
 function Stat({ label, value }: { label: string; value: string | number }) {
@@ -284,6 +285,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
 
         <Label style={{ marginTop: 14 }}>Help</Label>
         <Row icon="book" title="How to play" onPress={() => setSheet('rules')} right={<Icon name="arrow" size={16} />} />
+        <Row icon="smiley" title="Replay the tutorial" onPress={() => tutorial.open()} right={<Icon name="arrow" size={16} />} />
         <Row icon="check" title="How XP works" onPress={() => setSheet('xp')} right={<Icon name="arrow" size={16} />} />
 
         <Label style={{ marginTop: 14 }}>Data</Label>

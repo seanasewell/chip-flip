@@ -9,7 +9,7 @@ import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reani
 const SLICES = 10;
 const INK = '#111111';
 
-export function FlipCoin({ p, size, front, back, edge, outline = INK, shadow: showShadow = true }: { p: SharedValue<number>; size: number; front: React.ReactNode; back: React.ReactNode; edge: string; /** Soft shadow under the chip mid-flip (off for the logo). */ shadow?: boolean; /** Rim outline (ink for board chips; the logo's chips have none). */ outline?: string }) {
+export function FlipCoin({ p, size, front, back, edge, outline = INK, shadow: showShadow = false }: { p: SharedValue<number>; size: number; front: React.ReactNode; back: React.ReactNode; edge: string; /** Soft shadow under the chip mid-flip (off everywhere for now). */ shadow?: boolean; /** Rim outline (ink for board chips; the logo's chips have none). */ outline?: string }) {
   const thick = Math.max(3, size * 0.15);
   const bw = Math.max(1.5, size * 0.06);
 

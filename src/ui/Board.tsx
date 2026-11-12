@@ -78,7 +78,7 @@ const Cell = memo(function Cell({ i, cell, owner, locked, flipDelay, target, dim
             <TileFace cell={i} size={cell} dim={dim} />
           )
         ) : (
-          <Animated.View key={`${i}-${owner}`} entering={isNew ? chipDrop : undefined}>
+          <Animated.View key={`${i}-${owner}`} entering={isNew && !locked ? chipDrop : undefined}>
             <Chip side={owner} size={cell * 0.84} locked={locked} flipDelay={flipDelay} bare={target === 'remove'} />
           </Animated.View>
         )}

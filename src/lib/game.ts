@@ -11,7 +11,7 @@ import { MODES, WINDOWS, cellsForCard, isCorner, isJack, isRemoveJack, isWildJac
 import { canSwap, createMatch, currentSeatId, forfeit, lockedCells, play, seatById, sequenceCount, targetsFor, toWin } from '@/core/engine';
 import { randomSeed } from '@/core/rng';
 import { DECK_SIZE, type Action, type CardId, type Difficulty, type GameModeId, type MatchState, type Seat, type Sequence } from '@/core/types';
-import { gameMusic, haptic, sfx } from '@/ui/sound';
+import { gameMusic, haptic, resultsMusic, sfx } from '@/ui/sound';
 import { SIDE_COLORS, validColors } from '@/ui/theme';
 import { kv } from './kv';
 import { profile } from './profile';
@@ -228,6 +228,7 @@ class GameController {
     gameMusic.stop();
     this.set({ match: done, view: 'results', handoff: null, selected: null, busy: false });
     sfx.matchLoss();
+    resultsMusic('loss');
   }
 
   /** Leaves the results screen; the finished match is cleared. */
@@ -397,6 +398,7 @@ class GameController {
       this.set({ busy: false, view: 'results' });
       if (won) sfx.matchWin();
       else sfx.matchLoss();
+      resultsMusic(won ? 'win' : 'loss');
     });
   }
 
@@ -543,6 +545,7 @@ class GameController {
       this.set({ view: 'results' });
       if (won) sfx.matchWin();
       else sfx.matchLoss();
+      resultsMusic(won ? 'win' : 'loss');
     },
   };
 
