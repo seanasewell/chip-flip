@@ -105,10 +105,10 @@ const COPY: Record<Step, () => { title: string; body: string }> = {
   place: () => ({ title: 'Claim a space', body: 'Both of its spaces light up. Tap either one to place your chip.' }),
   coach: () => ({ title: 'Take turns', body: 'Opponents claim spaces with their cards too. After every play you draw a new card.' }),
   wild: () => ({ title: 'Two-eyed jacks are wild', body: `You have four ${mine()} chips in a row. Use the wild jack to place a chip at the end and finish the line.` }),
-  sequence: () => ({ title: "That's a sequence!", body: 'Five in a straight line, across, down or diagonal. Corners are free and count for everyone.' }),
+  sequence: () => ({ title: "That's a chip flip!", body: 'Five in a straight line, across, down or diagonal. Corners are free and count for everyone.' }),
   remove: () => ({ title: 'One-eyed jacks remove', body: 'Coach has four in a row. Play the one-eyed jack and remove one of their chips.' }),
-  removed: () => ({ title: 'Line broken', body: "Removal jacks can't touch chips that are already part of a sequence." }),
-  win: () => ({ title: 'Two sequences win', body: 'In head to head and two-team games, the first to complete two sequences wins. With three players or teams, one is enough.' }),
+  removed: () => ({ title: 'Line broken', body: "Removal jacks can't touch chips that are already part of a chip flip." }),
+  win: () => ({ title: 'Two chip flips win', body: 'In head to head and two-team games, the first to complete two chip flips wins. With three players or teams, one is enough.' }),
 };
 const ORDER: Step[] = ['hello', 'select', 'place', 'coach', 'wild', 'sequence', 'remove', 'removed', 'win'];
 

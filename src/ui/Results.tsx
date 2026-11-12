@@ -65,7 +65,7 @@ export function Results() {
             {title}
           </Display>
           {forfeited && <T style={{ marginTop: 4, color: C.muted, fontSize: 14 }}>{casual ? 'You forfeited this casual match.' : 'You forfeited this match. It counts as a loss.'}</T>}
-          {m.ending === 'stalemate' && <T style={{ marginTop: 4, color: C.muted, fontSize: 14, textAlign: 'center' }}>No one could play, so the most sequences (then the longest line) took it.</T>}
+          {m.ending === 'stalemate' && <T style={{ marginTop: 4, color: C.muted, fontSize: 14, textAlign: 'center' }}>No one could play, so the most chip flips (then the longest line) took it.</T>}
           {two && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <Display size={54} style={{ color: sideColor(you.side).base }}>

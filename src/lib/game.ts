@@ -322,7 +322,7 @@ class GameController {
     const card = this.state.selected;
     if (card == null) return this.hint('Pick a card first. Its spaces light up.');
     if (!targetsFor(m, id, card).includes(cell)) {
-      if (isRemoveJack(card)) return this.hint("Tap an opponent's chip that isn't in a sequence.");
+      if (isRemoveJack(card)) return this.hint("Tap an opponent's chip that isn't in a chip flip.");
       return this.hint(m.board[cell] !== null ? 'That space is taken.' : 'Tap one of the highlighted spaces.');
     }
     this.commit(id, isRemoveJack(card) ? { kind: 'remove', card, cell } : { kind: 'place', card, cell });

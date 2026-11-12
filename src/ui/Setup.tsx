@@ -18,11 +18,11 @@ const DIFFS: { id: Difficulty; label: string }[] = [
 ];
 
 export const MODE_COPY: Record<GameModeId, string> = {
-  h2h: 'You against one opponent. First to complete two sequences wins.',
-  ffa3: 'Every player for themselves. The first sequence wins.',
-  teams: 'Two teams of two. Teammates share a color and sit opposite of each other. Two sequences win.',
-  teams3v3: 'Two teams of three. Teammates share a color, alternating around the table. Two sequences win.',
-  teams3: 'Three teams of two. Teammates share a color, alternating around the table. First to complete a sequence wins.',
+  h2h: 'You against one opponent. First to complete two chip flips wins.',
+  ffa3: 'Every player for themselves. The first chip flip wins.',
+  teams: 'Two teams of two. Teammates share a color and sit opposite of each other. Two chip flips win.',
+  teams3v3: 'Two teams of three. Teammates share a color, alternating around the table. Two chip flips win.',
+  teams3: 'Three teams of two. Teammates share a color, alternating around the table. First to complete a chip flip wins.',
 };
 
 export function defaultSetup(mode: GameModeId): SetupConfig {

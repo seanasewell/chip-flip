@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MODES } from '@/core/board';
 import type { GameModeId } from '@/core/types';
 import { game, useGame } from '@/lib/game';
-import { levelOf, useProgress } from '@/lib/progress';
+import { DAILY, DAILY_BONUS, levelOf, nextDay, useProgress } from '@/lib/progress';
 import { ChipIcon } from './Chip';
 import { Icon } from './icons';
 import { Badge, Card, Display, Paper, T } from './kit';
@@ -13,6 +13,7 @@ import { LevelBadge } from './LevelBadge';
 import { Wordmark } from './Logo';
 import { Marquee } from './Marquee';
 import { fadeUp } from './motion';
+import { ChallengeSection } from './Rewards';
 import { MODE_COPY } from './Setup';
 import { C, F, applySideColors, sideColor } from './theme';
 
@@ -55,7 +56,7 @@ export function Home({ onMode, onLevel }: { onMode: (m: GameModeId) => void; onL
                 <View style={{ flex: 1 }}>
                   <Display size={20}>Resume match</Display>
                   <T numberOfLines={1} style={{ fontSize: 12, color: C.muted }}>
-                    {MODES[resume.mode].name} · Sequences {resume.score.length === 2 ? `${resume.score[resume.youSide]}–${resume.score[1 - resume.youSide]}` : resume.score.join('–')}
+                    {MODES[resume.mode].name} · Chip flips {resume.score.length === 2 ? `${resume.score[resume.youSide]}–${resume.score[1 - resume.youSide]}` : resume.score.join('–')}
                   </T>
                 </View>
                 <View style={{ backgroundColor: C.green, borderWidth: 2, borderColor: C.ink, paddingHorizontal: 12, height: 38, justifyContent: 'center' }}>
@@ -72,6 +73,10 @@ export function Home({ onMode, onLevel }: { onMode: (m: GameModeId) => void; onL
               </Animated.View>
             ))}
           </Card>
+
+          <View style={{ marginTop: 8 }}>
+            <ChallengeSection title="Daily challenges" set={p.daily} defs={DAILY} bonus={DAILY_BONUS} resets={nextDay()} />
+          </View>
         </View>
       </ScrollView>
     </Paper>

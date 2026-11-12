@@ -68,7 +68,7 @@ function Table() {
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Display size={20}>{MODES[m.mode].name}</Display>
             <Label style={{ fontSize: 9, opacity: 0.7 }}>
-              {g.config?.casual ? 'Casual · ' : ''}First to {toWin(m)} {toWin(m) === 1 ? 'sequence' : 'sequences'}
+              {g.config?.casual ? 'Casual · ' : ''}First to {toWin(m)} {toWin(m) === 1 ? 'chip flip' : 'chip flips'}
             </Label>
           </View>
           {DEV_TOOLS && <IconButton name="wrench" onPress={() => setMenu('dev')} label="Developer controls" />}
@@ -258,7 +258,7 @@ function Intro({ m }: { m: MatchState }) {
               <View style={{ width: `${pct * 100}%`, height: '100%', backgroundColor: C.blue }} />
             </View>
             <T style={{ textAlign: 'center', fontSize: 12, color: C.muted, marginTop: 12 }}>
-              First to {toWin(m)} {toWin(m) === 1 ? 'sequence' : 'sequences'} wins
+              First to {toWin(m)} {toWin(m) === 1 ? 'chip flip' : 'chip flips'} wins
             </T>
           </View>
         </Card>
@@ -345,10 +345,10 @@ function MatchMenu({ which, set }: { which: null | 'menu' | 'rules' | 'forfeit' 
         <Row title="Give me a dead card" sub="Both of its spaces get taken" onPress={() => run(game.dev.deadCard)} />
         <Row title="Give me a wild jack" sub="Two-eyed: place anywhere" onPress={() => run(game.dev.wildJack)} />
         <Row title="Give me a remove jack" sub="One-eyed, with chips to remove" onPress={() => run(game.dev.removeJack)} />
-        <Label style={{ marginTop: 10, marginBottom: 8 }}>Sequences</Label>
-        <Row title="Set up a sequence" sub="Four in a row and the card for the fifth" onPress={() => run(game.dev.setUpSequence)} />
-        <Row title="One move from winning" sub="Your last sequence is one card away" onPress={() => run(game.dev.winNext)} />
-        <Row title="Opponent about to win" sub="They complete their last sequence next turn" onPress={() => run(game.dev.opponentWinsNext)} />
+        <Label style={{ marginTop: 10, marginBottom: 8 }}>Chip flips</Label>
+        <Row title="Set up a chip flip" sub="Four in a row and the card for the fifth" onPress={() => run(game.dev.setUpSequence)} />
+        <Row title="One move from winning" sub="Your last chip flip is one card away" onPress={() => run(game.dev.winNext)} />
+        <Row title="Opponent about to win" sub="They complete their last chip flip next turn" onPress={() => run(game.dev.opponentWinsNext)} />
         <Label style={{ marginTop: 10, marginBottom: 8 }}>End the match</Label>
         <Row title="Jump to the win screen" onPress={() => run(() => game.dev.endMatch(true))} />
         <Row title="Jump to the loss screen" onPress={() => run(() => game.dev.endMatch(false))} />
@@ -404,7 +404,7 @@ function LastPlay({ m }: { m: MatchState }) {
     text = `${who} removed ${yours ? 'your' : victim ? `${victim.name}'s` : 'a'} chip from the ${place}`;
   } else if (isWildJack(a.card)) text = `${who} played a wild jack on the ${place}`;
   else text = `${who} placed a chip on the ${place}`;
-  if (show.newSequences > 0) text += show.newSequences > 1 ? ' and completed two sequences!' : ' and completed a sequence!';
+  if (show.newSequences > 0) text += show.newSequences > 1 ? ' and completed two chip flips!' : ' and completed a chip flip!';
   return (
     <Animated.View key={show.n} entering={fadeUp(0, 300)} style={{ height: H, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 4 }} accessibilityLiveRegion="polite">
       <View style={{ width: H - 6, height: H - 6, borderWidth: 2, borderColor: C.ink, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' }}>

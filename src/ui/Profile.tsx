@@ -78,7 +78,7 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
           <Display size={26}>{me?.name ?? 'You'}</Display>
         </View>
 
-        <Card>
+        <Card accent={C.blue}>
           <Pressable onPress={() => setXpOpen(true)} accessibilityRole="button" accessibilityLabel={`Level ${lvl.level}, ${lvl.title}. See all levels`}>
             <LevelCard xp={p.xp} />
           </Pressable>
@@ -126,7 +126,7 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
           <Stat label="Best win streak" value={s.bestWinStreak} />
         </View>
 
-        <Card>
+        <Card accent={C.blue}>
           <Pressable onPress={onAchievements} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
             <View style={{ flex: 1 }}>
               <Label style={{ fontSize: 9.5, opacity: 0.75 }}>Achievements</Label>

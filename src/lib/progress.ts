@@ -105,18 +105,18 @@ export interface AchievementDef {
 }
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'first-sequence', series: 'sequences', emoji: '🎯', name: 'First sequence', desc: 'Complete your first sequence', goal: 1, xp: 100, value: (p) => p.stats.sequences },
+  { id: 'first-sequence', series: 'sequences', emoji: '🎯', name: 'First chip flip', desc: 'Complete your first chip flip', goal: 1, xp: 100, value: (p) => p.stats.sequences },
   { id: 'first-victory', series: 'matches', emoji: '🏆', name: 'First victory', desc: 'Win your first match', goal: 1, xp: 150, value: (p) => p.stats.matchWins },
   { id: 'getting-started', series: 'matches', emoji: '🎮', name: 'Getting started', desc: 'Play 5 matches', goal: 5, xp: 150, value: (p) => p.stats.matchesPlayed },
   { id: 'on-a-roll', series: 'streaks', emoji: '🔥', name: 'On a roll', desc: 'Win 3 matches in a row', goal: 3, xp: 200, value: (p) => p.stats.bestWinStreak },
   { id: 'unstoppable', series: 'streaks', emoji: '⚡', name: 'Unstoppable', desc: 'Win 5 matches in a row', goal: 5, xp: 300, value: (p) => p.stats.bestWinStreak },
-  { id: 'shutout', series: 'matches', emoji: '💎', name: 'Shutout', desc: 'Win before anyone else completes a sequence', goal: 1, xp: 250, value: (p) => p.stats.shutouts },
+  { id: 'shutout', series: 'matches', emoji: '💎', name: 'Shutout', desc: 'Win before anyone else completes a chip flip', goal: 1, xp: 250, value: (p) => p.stats.shutouts },
   { id: 'strategic-thinker', series: 'matches', emoji: '🧠', name: 'Strategic thinker', desc: 'Win 25 matches', goal: 25, xp: 300, value: (p) => p.stats.matchWins },
   { id: 'lineup-legend', series: 'matches', emoji: '👑', name: 'Chip Flip legend', desc: 'Win 100 matches', goal: 100, xp: 500, value: (p) => p.stats.matchWins },
   { id: 'social-player', series: 'social', emoji: '🤝', name: 'Social player', desc: 'Play a match against a friend', goal: 1, xp: 150, value: (p) => p.stats.friendMatches },
   { id: 'daily-player', series: 'streaks', emoji: '📅', name: 'Daily player', desc: 'Play matches on 3 different days', goal: 3, xp: 150, value: (p) => Object.keys(p.stats.byDay).length },
-  { id: 'diagonal-master', series: 'sequences', emoji: '↗️', name: 'Diagonal master', desc: 'Complete 10 diagonal sequences', goal: 10, xp: 250, value: (p) => p.stats.diagonals },
-  { id: 'comeback', series: 'matches', emoji: '🔄', name: 'Comeback', desc: 'Win after an opponent completed the first sequence', goal: 1, xp: 300, value: (p) => p.stats.comebacks },
+  { id: 'diagonal-master', series: 'sequences', emoji: '↗️', name: 'Diagonal master', desc: 'Complete 10 diagonal chip flips', goal: 10, xp: 250, value: (p) => p.stats.diagonals },
+  { id: 'comeback', series: 'matches', emoji: '🔄', name: 'Comeback', desc: 'Win after an opponent completed the first chip flip', goal: 1, xp: 300, value: (p) => p.stats.comebacks },
   { id: 'wild-card', series: 'sequences', emoji: '🃏', name: 'Wild card', desc: 'Play 25 two-eyed jacks', goal: 25, xp: 200, value: (p) => p.stats.wildJacks },
   { id: 'cutthroat', series: 'sequences', emoji: '✂️', name: 'Cutthroat', desc: 'Remove 25 chips with one-eyed jacks', goal: 25, xp: 200, value: (p) => p.stats.removals },
   { id: 'streak-7', series: 'streaks', emoji: '🗓️', name: 'Week of play', desc: 'Play at least one match a day for 7 days in a row', goal: 7, xp: 300, value: (p) => p.streak.best },
@@ -125,7 +125,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
 
 export const ACHIEVEMENT_SERIES = [
   { key: 'matches', label: 'Matches' },
-  { key: 'sequences', label: 'Sequences' },
+  { key: 'sequences', label: 'Chip flips' },
   { key: 'streaks', label: 'Streaks' },
   { key: 'social', label: 'Social' },
 ];
@@ -145,25 +145,25 @@ export interface ChallengeDef {
 
 export const DAILY: ChallengeDef[] = [
   { id: 'warm-up', emoji: '🎮', name: 'Warm up', desc: 'Play 2 matches', xp: 50, goal: 2, metric: 'matches', level: 0 },
-  { id: 'sequence', emoji: '🏅', name: 'Five in a row', desc: 'Complete a sequence', xp: 50, goal: 1, metric: 'sequences', level: 0 },
+  { id: 'sequence', emoji: '🏅', name: 'Five in a row', desc: 'Complete a chip flip', xp: 50, goal: 1, metric: 'sequences', level: 0 },
   { id: 'wild', emoji: '🃏', name: 'Wild card', desc: 'Play a two-eyed jack', xp: 50, goal: 1, metric: 'wildJacks', level: 0 },
-  { id: 'on-the-angle', emoji: '↗️', name: 'On the angle', desc: 'Complete a diagonal sequence', xp: 75, goal: 1, metric: 'diagonal', level: 1 },
+  { id: 'on-the-angle', emoji: '↗️', name: 'On the angle', desc: 'Complete a diagonal chip flip', xp: 75, goal: 1, metric: 'diagonal', level: 1 },
   { id: 'victory', emoji: '🏆', name: 'Victory', desc: 'Win a match', xp: 75, goal: 1, metric: 'wins', level: 1 },
   { id: 'crowd', emoji: '👥', name: 'Crowded board', desc: 'Finish a match with three sides', xp: 75, goal: 1, metric: 'multi', level: 1 },
   { id: 'teamwork', emoji: '🤝', name: 'Teamwork', desc: 'Finish a team match', xp: 75, goal: 1, metric: 'teams', level: 1 },
   { id: 'snip', emoji: '✂️', name: 'Snip', desc: 'Remove 2 chips with one-eyed jacks', xp: 75, goal: 2, metric: 'removals', level: 1 },
-  { id: 'shutout', emoji: '💎', name: 'Shutout', desc: 'Win before anyone else completes a sequence', xp: 125, goal: 1, metric: 'shutout', level: 2 },
-  { id: 'hard-mode', emoji: '🔄', name: 'Rally', desc: 'Win after an opponent completes the first sequence', xp: 125, goal: 1, metric: 'comeback', level: 2 },
+  { id: 'shutout', emoji: '💎', name: 'Shutout', desc: 'Win before anyone else completes a chip flip', xp: 125, goal: 1, metric: 'shutout', level: 2 },
+  { id: 'hard-mode', emoji: '🔄', name: 'Rally', desc: 'Win after an opponent completes the first chip flip', xp: 125, goal: 1, metric: 'comeback', level: 2 },
   { id: 'double', emoji: '✨', name: 'Double up', desc: 'Win 2 matches', xp: 100, goal: 2, metric: 'wins2', level: 2 },
 ];
 
 export const WEEKLY: ChallengeDef[] = [
   { id: 'regular', emoji: '🎮', name: 'Regular', desc: 'Play 15 matches', xp: 200, goal: 15, metric: 'matches' },
   { id: 'champion', emoji: '🏆', name: 'Champion', desc: 'Win 5 matches', xp: 300, goal: 5, metric: 'wins' },
-  { id: 'sequence-builder', emoji: '🏅', name: 'Sequence builder', desc: 'Complete 15 sequences', xp: 250, goal: 15, metric: 'sequences' },
+  { id: 'sequence-builder', emoji: '🏅', name: 'Chip flip builder', desc: 'Complete 15 chip flips', xp: 250, goal: 15, metric: 'sequences' },
   { id: 'cutthroat', emoji: '✂️', name: 'Cutthroat', desc: 'Remove 10 chips with one-eyed jacks', xp: 200, goal: 10, metric: 'removals' },
-  { id: 'diagonals', emoji: '↗️', name: 'Diagonals', desc: 'Complete 3 diagonal sequences', xp: 250, goal: 3, metric: 'diagonal' },
-  { id: 'tough-crowd', emoji: '💎', name: 'Clean sweep', desc: 'Win 3 matches before anyone else completes a sequence', xp: 300, goal: 3, metric: 'shutout' },
+  { id: 'diagonals', emoji: '↗️', name: 'Diagonals', desc: 'Complete 3 diagonal chip flips', xp: 250, goal: 3, metric: 'diagonal' },
+  { id: 'tough-crowd', emoji: '💎', name: 'Clean sweep', desc: 'Win 3 matches before anyone else completes a chip flip', xp: 300, goal: 3, metric: 'shutout' },
 ];
 
 export const DAILY_BONUS = 150;
@@ -172,7 +172,7 @@ export const XP = { complete: 25, perSequence: 15, win: 100 };
 
 export const XP_WAYS: [string, string][] = [
   ['Finish a match', `+${XP.complete} XP`],
-  ['Each sequence you complete', `+${XP.perSequence} XP`],
+  ['Each chip flip you complete', `+${XP.perSequence} XP`],
   ['Win a match', `+${XP.win} XP bonus`],
   ['Daily challenges', '+50 to +125 XP each'],
   ['All 3 daily challenges', `+${DAILY_BONUS} XP bonus`],

@@ -113,7 +113,7 @@ export function Ranks() {
         ) : (
           <View style={{ gap: 8 }}>
             {list.map((r) => (
-              <Card key={r.userId} offset={3} bg={r.me ? '#C9D2FF' : undefined}>
+              <Card key={r.userId} offset={3} bg={r.me ? '#C9D2FF' : undefined} accent={C.blue}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 10 }}>
                   <View style={{ width: 26, alignItems: 'center' }}>
                     {r.rank <= 3 ? <Text style={{ fontSize: 20 }}>{MEDAL[r.rank - 1]}</Text> : <Label style={{ fontSize: 13 }}>{r.rank}</Label>}

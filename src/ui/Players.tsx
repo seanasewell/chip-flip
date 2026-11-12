@@ -36,7 +36,7 @@ export function SeatAvatar({ seat, size, badge = true }: { seat: Seat; size: num
 export function Pips({ count, total, side, size = 7 }: { count: number; total: number; side: number; size?: number }) {
   const c = sideColor(side);
   return (
-    <View style={{ flexDirection: 'row', gap: 4 }} accessibilityLabel={`${count} of ${total} sequences`}>
+    <View style={{ flexDirection: 'row', gap: 4 }} accessibilityLabel={`${count} of ${total} chip flips`}>
       {Array.from({ length: total }, (_, i) => (
         <View key={i} style={{ width: size * 1.8, height: size + 2, backgroundColor: i < count ? c.base : C.white, borderWidth: 1.5, borderColor: C.ink }} />
       ))}

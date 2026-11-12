@@ -147,7 +147,7 @@ export function Board({ board, size, sequences, fresh = [], lastMove = null, tar
         ? 'Free corner'
         : owner === null
           ? `${cellLabel(i)}${isTarget ? ', available' : ''}`
-          : `${cellLabel(i)}, ${sideNames[owner] ?? sideColor(owner).name}${locked.has(i) ? ', in a sequence' : ''}${isTarget ? ', tap to remove' : ''}`;
+          : `${cellLabel(i)}, ${sideNames[owner] ?? sideColor(owner).name}${locked.has(i) ? ', in a chip flip' : ''}${isTarget ? ', tap to remove' : ''}`;
       cells.push(
         <Cell
           key={i}

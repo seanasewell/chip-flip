@@ -43,7 +43,8 @@ function ChallengeCard({ def, set }: { def: ChallengeDef; set: ChallengeSet }) {
   );
 }
 
-function Section({ title, set, defs, bonus, resets }: { title: string; set: ChallengeSet; defs: ChallengeDef[]; bonus: number; resets: number }) {
+/** A challenge list (daily or weekly) with its bonus and reset time. */
+export function ChallengeSection({ title, set, defs, bonus, resets }: { title: string; set: ChallengeSet; defs: ChallengeDef[]; bonus: number; resets: number }) {
   const items = set.ids.map((id) => defs.find((d) => d.id === id)!).filter(Boolean);
   const done = items.filter((d) => set.done[d.id]).length;
   return (
@@ -79,8 +80,8 @@ export function Rewards() {
         <Segmented value={tab} options={[{ id: 'challenges', label: 'Challenges' }, { id: 'achievements', label: 'Achievements' }]} onChange={setTab} />
         {tab === 'challenges' ? (
           <>
-            <Section title="Daily challenges" set={p.daily} defs={DAILY} bonus={DAILY_BONUS} resets={nextDay()} />
-            <Section title="Weekly challenges" set={p.weekly} defs={WEEKLY} bonus={WEEKLY_BONUS} resets={nextWeek()} />
+            <ChallengeSection title="Daily challenges" set={p.daily} defs={DAILY} bonus={DAILY_BONUS} resets={nextDay()} />
+            <ChallengeSection title="Weekly challenges" set={p.weekly} defs={WEEKLY} bonus={WEEKLY_BONUS} resets={nextWeek()} />
             <T style={{ textAlign: 'center', color: C.muted, fontSize: 12 }}>Ranked matches count toward challenges</T>
           </>
         ) : (
@@ -153,7 +154,7 @@ function Achievements() {
           <View style={{ alignItems: 'center', gap: 8 }}>
             <Text style={{ fontSize: 54, opacity: st.unlocked ? 1 : 0.35 }}>{open.emoji}</Text>
             <T style={{ fontSize: 15, textAlign: 'center' }}>{open.desc}</T>
-            <T style={{ fontFamily: F.bodyBold, color: C.pink }}>{st.unlocked ? `Earned · +${open.xp} XP` : `+${open.xp} XP`}</T>
+            <T style={{ fontFamily: F.bodyBold, color: C.pink }}>{st.unlocked ? `✅ +${open.xp} XP` : `+${open.xp} XP`}</T>
             {!st.unlocked && (
               <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }}>
                 <View style={{ flex: 1 }}>

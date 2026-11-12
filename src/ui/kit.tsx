@@ -67,11 +67,16 @@ export function Label({ style, children, ...p }: TextProps & { style?: StyleProp
 }
 
 /** Ink-outlined box with a hard offset shadow. */
-export function Card({ children, style, shadow = C.ink, offset = 4, bg = C.paper, border = 2 }: { children?: React.ReactNode; style?: StyleProp<ViewStyle>; shadow?: string | null; offset?: number; bg?: string; border?: number }) {
+const ACCENT_W = 6;
+
+export function Card({ children, style, shadow = C.ink, offset = 4, bg = C.paper, border = 2, accent }: { children?: React.ReactNode; style?: StyleProp<ViewStyle>; shadow?: string | null; offset?: number; bg?: string; border?: number; /** Color bar down the left edge (as on the web build). */ accent?: string }) {
   return (
     <View style={[{ marginRight: shadow ? offset : 0, marginBottom: shadow ? offset : 0 }, style]}>
       {shadow && <View style={{ position: 'absolute', left: offset, top: offset, right: -offset, bottom: -offset, backgroundColor: shadow }} />}
-      <View style={{ backgroundColor: bg, borderWidth: border, borderColor: C.ink }}>{children}</View>
+      <View style={{ backgroundColor: bg, borderWidth: border, borderColor: C.ink, paddingLeft: accent ? ACCENT_W : 0 }}>
+        {accent && <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: ACCENT_W, backgroundColor: accent }} />}
+        {children}
+      </View>
     </View>
   );
 }
