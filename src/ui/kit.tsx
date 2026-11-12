@@ -33,7 +33,7 @@ export function T({ style, ...p }: TextProps & { style?: StyleProp<TextStyle> })
 
 /** Tall condensed display type (Anton), always upper case. Headings with
  *  line breaks are set one line per text box, so the lines sit tight
- *  together (about 0.95 em apart) without iOS clipping the letters. */
+ *  together (about 1.05 em apart) without iOS clipping the letters. */
 export function Display({ size = 22, style, children, ...p }: TextProps & { size?: number; style?: StyleProp<TextStyle> }) {
   const base = { ...anton(size), color: C.ink, textTransform: 'uppercase' as const };
   const parts = React.Children.toArray(children);
@@ -43,7 +43,7 @@ export function Display({ size = 22, style, children, ...p }: TextProps & { size
     return (
       <View>
         {lines.map((line, i) => (
-          <Text key={i} {...p} style={[base, style, i > 0 && { marginTop: -Math.round(size * 0.35) }]}>
+          <Text key={i} {...p} style={[base, style, i > 0 && { marginTop: -Math.round(size * 0.25) }]}>
             {line}
           </Text>
         ))}

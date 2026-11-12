@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { profile, useProfile } from '@/lib/profile';
 import { ProviderButtons } from './SignIn';
-import { Button, Display, Label, Paper, T } from './kit';
+import { Button, Display, Paper, T } from './kit';
 import { WelcomeLogo } from './Logo';
 import { C, F } from './theme';
 
@@ -50,8 +50,7 @@ export function Welcome() {
           <Animated.View entering={fadeIn()} style={{ flex: 1 }}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <Animated.View entering={fadeUp()}>
-                <Label>(1/1) Your name</Label>
-                <Display size={44} style={{ marginTop: 14 }}>
+                <Display size={44}>
                   What should{'\n'}we call you?
                 </Display>
                 <T style={{ marginTop: 14, color: C.muted, fontSize: 14 }}>Shown to the other players at the table. You can change it later in Settings.</T>

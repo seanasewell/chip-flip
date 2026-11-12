@@ -265,8 +265,8 @@ function Handoff({ seat }: { seat: Seat }) {
           <Label style={{ color: 'rgba(255,253,246,0.8)' }}>(Pass) Cards stay hidden</Label>
           <View style={{ marginTop: 12 }}>
             <Display size={54} style={{ color: C.blue }}>Pass the</Display>
-            <Display size={54} style={{ color: C.pink, paddingLeft: 30, marginTop: -19 }}>device</Display>
-            <Display size={54} style={{ color: C.orange, marginTop: -19 }} numberOfLines={2}>to {seat.name}</Display>
+            <Display size={54} style={{ color: C.pink, paddingLeft: 30, marginTop: -14 }}>device</Display>
+            <Display size={54} style={{ color: C.orange, marginTop: -14 }} numberOfLines={2}>to {seat.name}</Display>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22 }}>
             <SeatAvatar seat={seat} size={44} />
