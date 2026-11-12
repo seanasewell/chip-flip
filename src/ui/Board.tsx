@@ -84,8 +84,8 @@ const Cell = memo(function Cell({ i, cell, owner, locked, flipDelay, target, dim
         {target === 'remove' && (
           <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderWidth: 2, borderColor: C.pink, alignItems: 'center', justifyContent: 'center' }}>
             <Svg width={cell * 0.5} height={cell * 0.5} viewBox="0 0 20 20">
-              <Path d="M4 4l12 12M16 4L4 16" stroke={C.ink} strokeWidth={5} />
-              <Path d="M4 4l12 12M16 4L4 16" stroke={C.orange} strokeWidth={2.4} />
+              {/* White X over the chip; ink when "View board" hides the chips. */}
+              <Path d="M4 4l12 12M16 4L4 16" stroke={reveal ? C.ink : C.white} strokeWidth={2.6} strokeLinecap="round" />
             </Svg>
           </View>
         )}
