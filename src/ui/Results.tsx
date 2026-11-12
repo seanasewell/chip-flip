@@ -8,6 +8,7 @@ import type { Seat } from '@/core/types';
 import { game, useGame } from '@/lib/game';
 import { levelOf, progress } from '@/lib/progress';
 import { useEffect, useState } from 'react';
+import { Celebration } from './Celebration';
 import { LevelBadge } from './LevelBadge';
 import { Odometer } from './Odometer';
 import { WinConfetti } from './Confetti';
@@ -171,6 +172,7 @@ export function Results() {
           <Button title="Back to Play" variant="ghost" onPress={() => game.exit()} />
         </View>
       </View>
+      {!casual && earned && <Celebration earned={earned} />}
       {/* Only when you (or your team) won, not after a forfeit. */}
       {won && !m.forfeitedBy && <WinConfetti width={dims.width} height={dims.height} />}
     </Paper>
