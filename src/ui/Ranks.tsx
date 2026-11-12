@@ -72,7 +72,7 @@ export function Ranks() {
     <Paper>
       <PageHeader title="Ranks" top={insets.top} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 12, maxWidth: 560, width: '100%', alignSelf: 'center' }}>
-        <T style={{ color: C.muted, fontSize: 13, marginTop: -6 }}>{subtitle(metric, period)}</T>
+        <T style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>{subtitle(metric, period)}</T>
         <Segmented value={metric} options={[{ id: 'wins', label: 'Wins' }, { id: 'streak', label: 'Streak' }]} onChange={setMetric} />
         {metric === 'wins' && (
           <Segmented small value={period} options={[{ id: 'week', label: 'Week' }, { id: 'month', label: 'Month' }, { id: 'all', label: 'All time' }]} onChange={setPeriod} />
