@@ -13,14 +13,14 @@ import { LevelBadge } from './LevelBadge';
 import { Avatar } from './Players';
 import { RulesList } from './Rules';
 import { PageHeader } from './Tabs';
-import { C, F } from './theme';
+import { anton, C, F } from './theme';
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <Card style={{ flex: 1 }}>
       <View style={{ padding: 12 }}>
         <Label style={{ fontSize: 9.5, opacity: 0.75 }}>{label}</Label>
-        <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 26, lineHeight: 32, color: C.ink, marginTop: 2 }}>
+        <Text allowFontScaling={false} style={{ ...anton(26), color: C.ink, marginTop: 2 }}>
           {value}
         </Text>
       </View>
@@ -95,13 +95,13 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View>
                 <Label style={{ fontSize: 9.5, opacity: 0.75 }}>Current streak</Label>
-                <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 24, lineHeight: 30, color: C.ink, textTransform: 'uppercase' }}>
+                <Text allowFontScaling={false} style={{ ...anton(24), color: C.ink, textTransform: 'uppercase' }}>
                   🔥 {streak} {streak === 1 ? 'day' : 'days'}
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Label style={{ fontSize: 9.5, opacity: 0.75 }}>Personal best</Label>
-                <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 24, lineHeight: 30, color: C.pink, textTransform: 'uppercase' }}>
+                <Text allowFontScaling={false} style={{ ...anton(24), color: C.pink, textTransform: 'uppercase' }}>
                   {p.streak.best} {p.streak.best === 1 ? 'day' : 'days'}
                 </Text>
               </View>
@@ -136,7 +136,7 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
           <Pressable onPress={onAchievements} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
             <View style={{ flex: 1 }}>
               <Label style={{ fontSize: 9.5, opacity: 0.75 }}>Achievements</Label>
-              <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 24, lineHeight: 30, color: C.ink }}>
+              <Text allowFontScaling={false} style={{ ...anton(24), color: C.ink }}>
                 {unlocked.length} / {ACHIEVEMENTS.length}
               </Text>
             </View>

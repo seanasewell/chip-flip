@@ -34,7 +34,7 @@ export function Welcome() {
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <Animated.View entering={FadeInDown.duration(300)}>
                 <Label>(1/1) Your name</Label>
-                <Display size={44} style={{ marginTop: 8, lineHeight: 46 }}>
+                <Display size={44} style={{ marginTop: 14 }}>
                   What should{'\n'}we call you?
                 </Display>
                 <T style={{ marginTop: 8, color: C.muted, fontSize: 14 }}>Shown to the other players at the table. You can change it later in Settings.</T>

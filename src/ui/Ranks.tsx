@@ -7,7 +7,7 @@ import { profile, useProfile, type LeaderRow } from '@/lib/profile';
 import { Card, Label, Paper, Segmented, T } from './kit';
 import { Avatar } from './Players';
 import { PageHeader } from './Tabs';
-import { C, F } from './theme';
+import { anton, C, F } from './theme';
 
 type Metric = 'wins' | 'streak';
 type Period = 'week' | 'month' | 'all';
@@ -83,11 +83,11 @@ export function Ranks() {
             <Avatar glyph={(me?.name[0] ?? 'Y').toUpperCase()} hue={230} size={44} you />
             <View style={{ flex: 1 }}>
               <T style={{ fontSize: 12, color: C.muted }}>Your rank</T>
-              <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 26, lineHeight: 32, color: C.ink, textTransform: 'uppercase' }}>
+              <Text allowFontScaling={false} style={{ ...anton(26), color: C.ink, textTransform: 'uppercase' }}>
                 {mine ? ord(mine.rank) : '—'}
               </Text>
             </View>
-            <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 34, lineHeight: 40, color: C.greenText }}>
+            <Text allowFontScaling={false} style={{ ...anton(34), color: C.greenText }}>
               {mine?.score ?? myScore}
             </Text>
           </View>
@@ -123,7 +123,7 @@ export function Ranks() {
                     {r.me ? `${r.name} (you)` : r.name}
                   </T>
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 20, lineHeight: 24, color: C.ink }}>{r.score}</Text>
+                    <Text allowFontScaling={false} style={{ ...anton(20), color: C.ink }}>{r.score}</Text>
                     <Label style={{ fontSize: 8, opacity: 0.6 }}>{metric === 'streak' ? 'in a row' : r.score === 1 ? 'win' : 'wins'}</Label>
                   </View>
                 </View>

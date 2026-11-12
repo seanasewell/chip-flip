@@ -64,11 +64,11 @@ export function Results() {
           {m.ending === 'stalemate' && <T style={{ marginTop: 4, color: C.muted, fontSize: 14, textAlign: 'center' }}>No one could play, so the most sequences (then the longest line) took it.</T>}
           {two && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 }}>
-              <Display size={54} style={{ color: sideColor(you.side).base, lineHeight: 60 }}>
+              <Display size={54} style={{ color: sideColor(you.side).base }}>
                 {seq(you.side)}
               </Display>
               <View style={{ width: 20, height: 5, backgroundColor: C.ink }} />
-              <Display size={54} style={{ color: sideColor(1 - you.side).base, lineHeight: 60 }}>
+              <Display size={54} style={{ color: sideColor(1 - you.side).base }}>
                 {seq(1 - you.side)}
               </Display>
             </View>

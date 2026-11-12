@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { LAYOUT, cardFace, faceLabel, isRemoveJack, isWildJack } from '@/core/board';
 import type { CardId, Suit } from '@/core/types';
-import { C, F, SUIT_COLOR } from './theme';
+import { anton, C, F, SUIT_COLOR } from './theme';
 
 const SUIT_PATH: Record<Suit, string> = {
   heart: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
@@ -31,7 +31,7 @@ export const TileFace = memo(function TileFace({ cell, size, dim = false }: { ce
   const ten = k.rank === '10';
   return (
     <View pointerEvents="none" style={{ alignItems: 'center', justifyContent: 'center', opacity: dim ? 0.35 : 1 }}>
-      <Text style={{ fontFamily: F.display, color: C.ink, fontSize: size * (ten ? 0.3 : 0.34), lineHeight: size * 0.38, letterSpacing: ten ? -0.8 : 0 }} allowFontScaling={false}>
+      <Text style={{ ...anton(size * (ten ? 0.3 : 0.34)), color: C.ink, letterSpacing: ten ? -0.8 : 0 }} allowFontScaling={false}>
         {k.rank}
       </Text>
       <View style={{ marginTop: size * 0.02 }}>
@@ -79,7 +79,7 @@ export function HandCard({ card, width, state, onPress, fresh = false }: { card:
               />
             )}
             <View style={{ position: 'absolute', left: 4, top: 2, alignItems: 'center' }}>
-              <Text allowFontScaling={false} style={{ fontFamily: F.display, color, fontSize: width * 0.3, lineHeight: width * 0.36, letterSpacing: k.rank === '10' ? -1 : 0 }}>
+              <Text allowFontScaling={false} style={{ ...anton(width * 0.3), color, letterSpacing: k.rank === '10' ? -1 : 0 }}>
                 {k.rank}
               </Text>
               <SuitIcon suit={k.suit} size={width * 0.22} color={color} />

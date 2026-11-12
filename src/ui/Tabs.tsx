@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useProfile } from '@/lib/profile';
 import { Avatar } from './Players';
-import { C, F } from './theme';
+import { anton, C, F } from './theme';
 
 export type Tab = 'play' | 'ranks' | 'rewards' | 'profile';
 
@@ -48,7 +48,7 @@ export function TabBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
 export function PageHeader({ title, right, top }: { title: string; right?: React.ReactNode; top: number }) {
   return (
     <View style={{ paddingTop: top + 6, paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 32, lineHeight: 38, color: C.ink, textTransform: 'uppercase' }}>
+      <Text allowFontScaling={false} style={{ ...anton(32), color: C.ink, textTransform: 'uppercase' }}>
         {title}
       </Text>
       {right}

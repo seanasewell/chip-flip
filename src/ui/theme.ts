@@ -82,3 +82,13 @@ export function tint(hex: string, amount: number) {
   const mix = (c: number) => Math.round(255 + (c - 255) * amount);
   return `rgb(${mix((n >> 16) & 255)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
 }
+
+/**
+ * Display type (Anton). Its glyphs reach 1.18 em above the baseline, so on
+ * iOS any line height under 1.5 em clips the tops of the letters. The line
+ * box is kept at the font's full height and pulled in with negative margins,
+ * so titles stay tight without being cut off.
+ */
+export function anton(size: number) {
+  return { fontFamily: F.display, fontSize: size, lineHeight: Math.round(size * 1.5), marginVertical: -Math.round(size * 0.2) };
+}

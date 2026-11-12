@@ -261,9 +261,9 @@ function Handoff({ seat }: { seat: Seat }) {
         <Animated.View entering={FadeInDown.duration(300)} style={{ width: '100%', maxWidth: 360, alignSelf: 'center' }}>
           <Label style={{ color: 'rgba(255,253,246,0.8)' }}>(Pass) Cards stay hidden</Label>
           <View style={{ marginTop: 12 }}>
-            <Display size={54} style={{ color: C.blue, lineHeight: 52 }}>Pass the</Display>
-            <Display size={54} style={{ color: C.pink, lineHeight: 52, paddingLeft: 30 }}>device</Display>
-            <Display size={54} style={{ color: C.orange, lineHeight: 56 }} numberOfLines={2}>to {seat.name}</Display>
+            <Display size={54} style={{ color: C.blue }}>Pass the</Display>
+            <Display size={54} style={{ color: C.pink, paddingLeft: 30 }}>device</Display>
+            <Display size={54} style={{ color: C.orange }} numberOfLines={2}>to {seat.name}</Display>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22 }}>
             <SeatAvatar seat={seat} size={44} />

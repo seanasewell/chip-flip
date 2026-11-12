@@ -5,13 +5,13 @@ import { sequenceCount, toWin } from '@/core/engine';
 import type { MatchState, Seat } from '@/core/types';
 import { ChipIcon } from './Chip';
 import { Badge } from './kit';
-import { C, F, sideColor } from './theme';
+import { anton, C, sideColor } from './theme';
 
 /** Letter avatar in the player's color. */
 export function Avatar({ glyph, hue, size, you = false }: { glyph: string; hue: number; size: number; you?: boolean }) {
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2, borderColor: C.ink, backgroundColor: you ? C.blue : `hsl(${hue}, 85%, 58%)`, alignItems: 'center', justifyContent: 'center' }}>
-      <Text allowFontScaling={false} style={{ fontFamily: F.display, color: C.white, fontSize: size * 0.48, lineHeight: size * 0.62 }}>
+      <Text allowFontScaling={false} style={{ ...anton(size * 0.48), color: C.white }}>
         {glyph}
       </Text>
     </View>
@@ -75,7 +75,7 @@ export function PlayerStrip({ m, activeId }: { m: MatchState; activeId: string |
               <View style={{ flex: 1, minWidth: 0 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                   <ChipIcon color={c} size={13} mark={0.5} />
-                  <Text numberOfLines={1} allowFontScaling={false} style={{ flexShrink: 1, fontFamily: F.display, fontSize: 14, lineHeight: 17, color: on ? C.ink : C.muted, textTransform: 'uppercase' }}>
+                  <Text numberOfLines={1} allowFontScaling={false} style={{ ...anton(14), flexShrink: 1, color: on ? C.ink : C.muted, textTransform: 'uppercase' }}>
                     {label}
                   </Text>
                 </View>

@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
-import { C, F } from './theme';
+import { anton, C } from './theme';
 
 function Star() {
   return (
@@ -28,7 +28,7 @@ export function Marquee({ items, color = C.blue, tilt = -3, reverse = false, spe
     <View key={key} onLayout={measure ? (e) => setW(e.nativeEvent.layout.width) : undefined} style={{ flexDirection: 'row', alignItems: 'center' }}>
       {items.map((t, i) => (
         <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text allowFontScaling={false} style={{ fontFamily: F.display, fontSize: 22, color: C.white, textTransform: 'uppercase', paddingHorizontal: 12 }}>
+          <Text allowFontScaling={false} style={{ ...anton(22), color: C.white, textTransform: 'uppercase', paddingHorizontal: 12 }}>
             {t}
           </Text>
           <Star />

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
 import { Icon, type IconName } from './icons';
-import { C, F } from './theme';
+import { C, F, anton } from './theme';
 
 /** Cream paper with a faint grid, behind every screen. */
 export function Paper({ children, style, dark = false }: { children?: React.ReactNode; style?: StyleProp<ViewStyle>; dark?: boolean }) {
@@ -33,7 +33,7 @@ export function T({ style, ...p }: TextProps & { style?: StyleProp<TextStyle> })
 /** Tall condensed display type (Anton), always upper case. */
 export function Display({ size = 22, style, children, ...p }: TextProps & { size?: number; style?: StyleProp<TextStyle> }) {
   return (
-    <Text {...p} style={[{ fontFamily: F.display, color: C.ink, fontSize: size, lineHeight: Math.round(size * 1.12), textTransform: 'uppercase' }, style]}>
+    <Text {...p} style={[{ ...anton(size), color: C.ink, textTransform: 'uppercase' }, style]}>
       {children}
     </Text>
   );
