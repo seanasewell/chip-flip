@@ -9,6 +9,7 @@ import { game, useGame } from '@/lib/game';
 import { levelOf, progress } from '@/lib/progress';
 import { useEffect, useState } from 'react';
 import { LevelBadge } from './LevelBadge';
+import { Odometer } from './Odometer';
 import { fadeIn, fadeUp, pop } from './motion';
 import { Button, Card, Display, Label, Paper, T } from './kit';
 import { Avatar, Pips, SeatAvatar } from './Players';
@@ -87,7 +88,9 @@ export function Results() {
               ) : (
                 <>
                   <Label style={{ fontSize: 9.5, opacity: 0.7 }}>XP earned</Label>
-                  <Display size={24} style={{ color: C.blue }}>+{earned ? earned.xpTo - earned.xpFrom : 0}</Display>
+                  <View style={{ marginTop: 2 }}>
+                    <Odometer value={earned ? earned.xpTo - earned.xpFrom : 0} prefix="+" size={24} color={C.blue} delay={450} />
+                  </View>
                 </>
               )}
             </View>
