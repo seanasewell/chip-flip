@@ -21,9 +21,11 @@ export function ChipIcon({ color, size, mark = 0.42, stroke = 1.5 }: { color: Si
   return (
     <Svg width={size} height={size} viewBox="0 0 20 20">
       <Circle cx={10} cy={10} r={10 - sw / 2} fill={color.base} stroke="#111111" strokeWidth={sw} />
-      <G transform={`translate(10 10) scale(${mark}) translate(-10 -10)`}>
-        <Shape kind={color.marker} color={color.mark} />
-      </G>
+      {mark > 0 && (
+        <G transform={`translate(10 10) scale(${mark}) translate(-10 -10)`}>
+          <Shape kind={color.marker} color={color.mark} />
+        </G>
+      )}
     </Svg>
   );
 }
@@ -45,7 +47,7 @@ export function CrownChip({ color, size, stroke = 1.5 }: { color: string; size: 
 
 /** A chip on the board. `locked` flips it to the crown, after `flipDelay`
  *  ms when it has just become part of a sequence. */
-export const Chip = memo(function Chip({ side, size, locked = false, flipDelay = 0 }: { side: number; size: number; locked?: boolean; flipDelay?: number }) {
+export const Chip = memo(function Chip({ side, size, locked = false, flipDelay = 0, bare = false }: { side: number; size: number; locked?: boolean; flipDelay?: number; /** No symbol (an X is drawn on top instead). */ bare?: boolean }) {
   const c = sideColor(side);
   const bw = Math.max(1.5, size * 0.07);
   // 0 = face up, 1 = crown. Chips already in a sequence start flipped; a
@@ -63,7 +65,7 @@ export const Chip = memo(function Chip({ side, size, locked = false, flipDelay =
   return (
     <View style={{ width: size, height: size }}>
       <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, front]}>
-        <ChipIcon color={c} size={size} mark={0.34} stroke={bw} />
+        <ChipIcon color={c} size={size} mark={bare ? 0 : 0.34} stroke={bw} />
       </Animated.View>
       <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, back]}>
         <CrownChip color={c.base} size={size} stroke={bw} />
