@@ -51,7 +51,7 @@ interface CellProps {
 const Cell = memo(function Cell({ i, cell, owner, locked, flipDelay, target, dim, isNew, removed, reveal, activeLight, label, onTap }: CellProps) {
   const corner = isCorner(i);
   const ring = Math.max(2.5, Math.round(cell * 0.1));
-  const bg = corner ? C.green : owner !== null ? (locked ? tint(sideColor(owner).base, 0.1) : C.paper) : target === 'place' ? activeLight : C.paper;
+  const bg = corner ? C.green : owner !== null ? (locked ? tint(sideColor(owner).base, 0.3) : C.paper) : target === 'place' ? activeLight : C.paper;
   return (
     <Pressable onPress={onTap ? () => onTap(i) : undefined} disabled={!onTap} accessibilityLabel={label} style={{ width: cell, height: cell }}>
       <View
