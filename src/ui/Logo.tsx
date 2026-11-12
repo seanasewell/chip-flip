@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 
 import { PARTICLES, Particle } from './Burst';
+import { FlipCoin } from './Coin';
 import { Image, View } from 'react-native';
 import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
@@ -50,9 +51,6 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
     opacity: interpolate(pop.value, [0, 0.7, 1], [0, 1, 1], Extrapolation.CLAMP),
     transform: [{ scale: interpolate(pop.value, [0, 0.7, 1], [0.3, 1.1, 1], Extrapolation.CLAMP) }],
   }));
-  // The flip turns the chip over in 3D; each face hides when turned away.
-  const front = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${flip.value * 180}deg` }] }));
-  const back = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${180 + flip.value * 180}deg` }] }));
   // The dissolve is abrupt: a quick punch, then the chip bursts into
   // particles with a flash of light, gone in about a quarter second.
   const burst = useAnimatedStyle(() => ({
@@ -70,13 +68,17 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
     opacity: interpolate(inn.value, [0, 0.7, 1], [0, 1, 1], Extrapolation.CLAMP),
     transform: [{ scale: interpolate(inn.value, [0, 0.7, 1], [0.6, 1.08, 1], Extrapolation.CLAMP) }],
   }));
-  const face = { position: 'absolute' as const, left: 0, top: 0, width: size, height: size, backfaceVisibility: 'hidden' as const };
   const img = { position: 'absolute' as const, width: size, height: size };
   const big = size * (355 / 155);
 
   return (
     <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size, zIndex: swaps ? 2 : 1 }, popStyle]}>
-      <Animated.View style={[face, front]}>
+      <FlipCoin
+        p={flip}
+        size={size}
+        edge="#1F3AD6"
+        front={
+          <>
         {swaps ? (
           <>
             <Animated.Image source={BLUE} style={[img, inStyle]} />
@@ -91,10 +93,10 @@ function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: num
         ) : (
           <Image source={BLUE} style={img} />
         )}
-      </Animated.View>
-      <Animated.View style={[face, back]}>
-        <Image source={CROWN} style={img} />
-      </Animated.View>
+          </>
+        }
+        back={<Image source={CROWN} style={img} />}
+      />
     </Animated.View>
   );
 }

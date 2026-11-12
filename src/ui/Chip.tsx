@@ -1,11 +1,13 @@
 // Chips: flat, with an even ink outline and the side's symbol. A chip in a
 // completed sequence flips over to show a crown.
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { Easing, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 
 import { FLIP_MS } from '@/lib/game';
+import { FlipCoin } from './Coin';
 import { sideColor, type SideColor } from './theme';
 
 function Shape({ kind, color }: { kind: string; color: string }) {
@@ -54,22 +56,31 @@ export const Chip = memo(function Chip({ side, size, locked = false, flipDelay =
   // chip that just completed one (it has a flip delay) lands face up and
   // flips with the rest of its line.
   const p = useSharedValue(locked && flipDelay === 0 ? 1 : 0);
+  // The 3D coin (edge, shadow, light) is only drawn while flipping; a chip at
+  // rest is a single flat drawing, which keeps a full board light.
+  const [restCrown, setRestCrown] = useState(locked && flipDelay === 0);
+  const [turning, setTurning] = useState(locked && flipDelay > 0);
+  const [prevLocked, setPrevLocked] = useState(locked);
+  if (locked !== prevLocked) {
+    setPrevLocked(locked);
+    setTurning(true);
+  }
   useEffect(() => {
     const to = locked ? 1 : 0;
     if (p.value === to) return;
-    p.value = withDelay(flipDelay, withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.3, 1.25, 0.5, 1) }));
+    const settle = () => {
+      setRestCrown(locked);
+      setTurning(false);
+    };
+    p.value = withDelay(
+      flipDelay,
+      withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.3, 1.25, 0.5, 1) }, (done) => {
+        if (done) scheduleOnRN(settle);
+      }),
+    );
   }, [locked, flipDelay, p]);
-  // A real 3D flip, as on the web: each face hides when it turns away.
-  const front = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${p.value * 180}deg` }] }));
-  const back = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${180 + p.value * 180}deg` }] }));
-  return (
-    <View style={{ width: size, height: size }}>
-      <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, front]}>
-        <ChipIcon color={c} size={size} mark={bare ? 0 : 0.34} stroke={bw} />
-      </Animated.View>
-      <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, back]}>
-        <CrownChip color={c.base} size={size} stroke={bw} />
-      </Animated.View>
-    </View>
-  );
+  const front = <ChipIcon color={c} size={size} mark={bare ? 0 : 0.34} stroke={bw} />;
+  const back = <CrownChip color={c.base} size={size} stroke={bw} />;
+  if (!turning) return <View style={{ width: size, height: size }}>{restCrown ? back : front}</View>;
+  return <FlipCoin p={p} size={size} edge={c.dark} front={front} back={back} />;
 });
