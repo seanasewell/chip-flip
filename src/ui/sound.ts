@@ -44,6 +44,7 @@ const STINGS = { win: require('@/assets/sounds/win.mp3'), loss: require('@/asset
 const stingPlayers = new Map<keyof typeof STINGS, AudioPlayer>();
 
 function stopSting() {
+  stingWanted = null;
   stingPlayers.forEach((p) => {
     try {
       p.pause();
@@ -84,6 +85,7 @@ export function setMusicEnabled(on: boolean) {
 export function initSound() {
   setAudioModeAsync({ playsInSilentMode: false, interruptionMode: 'mixWithOthers' }).catch(() => {});
   (Object.keys(SOURCES) as Name[]).forEach((n) => player(n));
+  (Object.keys(STINGS) as (keyof typeof STINGS)[]).forEach((k) => stingPlayer(k));
   AppState.addEventListener('change', (s) => {
     appActive = s === 'active';
     if (!appActive) {
@@ -157,22 +159,48 @@ export const gameMusic = {
   },
 };
 
-/** The win or loss tune for the results screen (follows the music setting). */
-export function resultsMusic(kind: keyof typeof STINGS) {
-  stopSting();
-  if (!musicEnabled() || !appActive) return;
+function stingPlayer(kind: keyof typeof STINGS): AudioPlayer | null {
   try {
     let p = stingPlayers.get(kind);
     if (!p) {
-      p = createAudioPlayer(STINGS[kind]);
+      p = createAudioPlayer(STINGS[kind], { keepAudioSessionActive: true });
       p.volume = MUSIC_VOLUME;
       stingPlayers.set(kind, p);
     }
-    p.seekTo(0);
-    p.play();
+    return p;
   } catch {
-    /* audio unavailable */
+    return null;
   }
+}
+
+let stingWanted: keyof typeof STINGS | null = null;
+
+/** The win or loss tune for the results screen (follows the music setting).
+ *  Both are loaded at startup so they start the moment the screen opens. */
+export function resultsMusic(kind: keyof typeof STINGS) {
+  stopSting();
+  stingWanted = null;
+  if (!musicEnabled() || !appActive) return;
+  const p = stingPlayer(kind);
+  if (!p) return;
+  stingWanted = kind;
+  const start = () => {
+    try {
+      p.seekTo(0)?.catch?.(() => {});
+    } catch {
+      /* ignore */
+    }
+    try {
+      p.play();
+    } catch {
+      /* audio unavailable */
+    }
+  };
+  start();
+  // If the player wasn't ready yet, try again once it has had a moment.
+  setTimeout(() => {
+    if (stingWanted === kind && !p.playing && p.currentTime < 0.2) start();
+  }, 450);
 }
 
 export const sfx = {
