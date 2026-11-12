@@ -8,7 +8,7 @@ import { profile, useProfile } from '@/lib/profile';
 import { Bar } from './Bar';
 import { useSoundSettings } from './GameScreen';
 import { Icon } from './icons';
-import { Button, Card, Display, IconButton, Label, Paper, Row, Sheet, T, Toggle } from './kit';
+import { Button, Card, Display, IconButton, Label, Paper, Row, Segmented, Sheet, T, Toggle } from './kit';
 import { LevelBadge, TIER_LEVELS, tierColor } from './LevelBadge';
 import { Avatar } from './Players';
 import { RulesList } from './Rules';
@@ -29,17 +29,23 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+function XpTable() {
+  return (
+    <View style={{ borderWidth: 2, borderColor: C.ink }}>
+      {XP_WAYS.map(([k, v], i) => (
+        <View key={k} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10, padding: 12, borderTopWidth: i ? 2 : 0, borderColor: C.ink, backgroundColor: C.paper }}>
+          <T style={{ flex: 1, fontSize: 14 }}>{k}</T>
+          <T style={{ fontFamily: F.bodyBold, fontSize: 13.5, color: C.pink }}>{v}</T>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function XpSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Sheet open={open} onClose={onClose} title="How XP works">
-      <View style={{ borderWidth: 2, borderColor: C.ink }}>
-        {XP_WAYS.map(([k, v], i) => (
-          <View key={k} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10, padding: 12, borderTopWidth: i ? 2 : 0, borderColor: C.ink, backgroundColor: C.paper }}>
-            <T style={{ flex: 1, fontSize: 14 }}>{k}</T>
-            <T style={{ fontFamily: F.bodyBold, fontSize: 13.5, color: C.pink }}>{v}</T>
-          </View>
-        ))}
-      </View>
+      <XpTable />
       <T style={{ fontSize: 12.5, color: C.muted, marginTop: 10, lineHeight: 18 }}>Only ranked matches earn XP. Forfeited matches earn none.</T>
     </Sheet>
   );
@@ -159,48 +165,60 @@ function LevelCard({ xp }: { xp: number }) {
   );
 }
 
-/** Your level, every title tier and how to earn XP. */
+/** Your level, then How to earn XP and Levels on a segmented control. */
 export function LevelSheet({ open, onClose, xp }: { open: boolean; onClose: () => void; xp: number }) {
   const lvl = levelOf(xp);
   const current = [...TIER_LEVELS].reverse().find((n) => lvl.level >= n)!;
-  const [ways, setWays] = useState(false);
+  const [tab, setTab] = useState<'earn' | 'levels'>('earn');
   return (
     <Sheet open={open} onClose={onClose} title="Level">
       <Card>
         <LevelCard xp={xp} />
       </Card>
-      <Label style={{ marginTop: 18, marginBottom: 8, opacity: 0.7 }}>Levels</Label>
-      <View style={{ gap: 8 }}>
-        {TIER_LEVELS.map((n) => {
-          const isCur = n === current;
-          const reached = n < current;
-          return (
-            <Card key={n} offset={3}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderLeftWidth: isCur ? 6 : 0, borderColor: C.blue }}>
-                <LevelBadge level={n} size={44} />
-                <View style={{ flex: 1 }}>
-                  <Display size={17}>{levelTitle(n)}</Display>
-                  <T style={{ fontSize: 12.5, color: isCur ? C.ink : C.muted }}>Level {n}</T>
-                </View>
-                {isCur ? (
-                  <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>Current</T>
-                ) : reached ? (
-                  <T style={{ fontSize: 18 }}>✅</T>
-                ) : (
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>{xpForLevel(n).toLocaleString()} XP</T>
-                    <T style={{ fontSize: 11.5, color: C.muted }}>total</T>
+      <View style={{ marginTop: 16, marginBottom: 14 }}>
+        <Segmented
+          value={tab}
+          options={[
+            { id: 'earn', label: 'How to earn XP' },
+            { id: 'levels', label: 'Levels' },
+          ]}
+          onChange={setTab}
+        />
+      </View>
+      {tab === 'earn' ? (
+        <>
+          <XpTable />
+          <T style={{ fontSize: 12.5, color: C.muted, marginTop: 10, lineHeight: 18 }}>Only ranked matches earn XP. Forfeited matches earn none.</T>
+        </>
+      ) : (
+        <View style={{ gap: 8 }}>
+          {TIER_LEVELS.map((n) => {
+            const isCur = n === current;
+            const reached = n < current;
+            return (
+              <Card key={n} offset={3}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderLeftWidth: isCur ? 6 : 0, borderColor: C.blue }}>
+                  <LevelBadge level={n} size={44} />
+                  <View style={{ flex: 1 }}>
+                    <Display size={17}>{levelTitle(n)}</Display>
+                    <T style={{ fontSize: 12.5, color: isCur ? C.ink : C.muted }}>Level {n}</T>
                   </View>
-                )}
-              </View>
-            </Card>
-          );
-        })}
-      </View>
-      <View style={{ marginTop: 14 }}>
-        <Row icon="check" title="How to earn XP" onPress={() => setWays(true)} right={<Icon name="arrow" size={16} />} />
-      </View>
-      <XpSheet open={ways} onClose={() => setWays(false)} />
+                  {isCur ? (
+                    <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>Current</T>
+                  ) : reached ? (
+                    <T style={{ fontSize: 18 }}>✅</T>
+                  ) : (
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>{xpForLevel(n).toLocaleString()} XP</T>
+                      <T style={{ fontSize: 11.5, color: C.muted }}>total</T>
+                    </View>
+                  )}
+                </View>
+              </Card>
+            );
+          })}
+        </View>
+      )}
     </Sheet>
   );
 }
