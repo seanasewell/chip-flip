@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ACHIEVEMENTS, ACHIEVEMENT_SERIES, DAILY, DAILY_BONUS, WEEKLY, WEEKLY_BONUS, achievementState, nextDay, nextWeek, useProgress, type ChallengeDef, type ChallengeSet } from '@/lib/progress';
+import { ACHIEVEMENTS, ACHIEVEMENT_SERIES, DAILY, DAILY_BONUS, WEEKLY, WEEKLY_BONUS, achievementState, nextDay, nextWeek, useProgress, type AchievementDef, type ChallengeDef, type ChallengeSet } from '@/lib/progress';
 import { Bar } from './Bar';
-import { Card, Display, Label, Paper, Segmented, T } from './kit';
+import { Card, Display, Label, Paper, Segmented, Sheet, T } from './kit';
 import { PageHeader } from './Tabs';
 import { C, F } from './theme';
 
@@ -72,7 +72,6 @@ export function Rewards() {
   const insets = useSafeAreaInsets();
   const p = useProgress();
   const [tab, setTab] = useState<'challenges' | 'achievements'>('challenges');
-  const unlocked = ACHIEVEMENTS.filter((a) => p.unlocked[a.id]).length;
   return (
     <Paper>
       <PageHeader title="Rewards" top={insets.top} />
@@ -85,45 +84,82 @@ export function Rewards() {
             <T style={{ textAlign: 'center', color: C.muted, fontSize: 12 }}>Ranked matches count toward challenges</T>
           </>
         ) : (
-          <>
-            <T style={{ color: C.muted, fontSize: 13, marginTop: -6 }}>
-              {unlocked} of {ACHIEVEMENTS.length} unlocked
-            </T>
-            {ACHIEVEMENT_SERIES.map((s) => (
-              <View key={s.key} style={{ gap: 10 }}>
-                <Label>{s.label}</Label>
-                {ACHIEVEMENTS.filter((a) => a.series === s.key).map((a) => {
-                  const st = achievementState(p, a);
-                  return (
-                    <Card key={a.id} shadow={st.unlocked ? C.green : C.ink}>
-                      <View style={{ flexDirection: 'row', gap: 12, padding: 14, alignItems: 'center', opacity: st.unlocked ? 1 : 0.92 }}>
-                        <Text style={{ fontSize: 24, width: 32, textAlign: 'center', opacity: st.unlocked ? 1 : 0.45 }}>{a.emoji}</Text>
-                        <View style={{ flex: 1 }}>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-                            <T style={{ fontFamily: F.bodyBold, flexShrink: 1 }}>{a.name}</T>
-                            <T style={{ fontFamily: F.bodyBold, fontSize: 12.5, color: C.pink }}>{st.unlocked ? '✅' : `+${a.xp} XP`}</T>
-                          </View>
-                          <T style={{ fontSize: 12.5, color: C.muted, marginTop: 1 }}>{a.desc}</T>
-                          {!st.unlocked && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }}>
-                              <View style={{ flex: 1 }}>
-                                <Bar pct={st.pct} color={C.blue} height={10} />
-                              </View>
-                              <Label style={{ fontSize: 10, opacity: 0.75 }}>
-                                {Math.min(st.value, a.goal)} / {a.goal}
-                              </Label>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    </Card>
-                  );
-                })}
-              </View>
-            ))}
-          </>
+          <Achievements />
         )}
       </ScrollView>
     </Paper>
+  );
+}
+
+type Filter = 'all' | string;
+
+/** Achievements: category chips that scroll sideways, then a grid of
+ *  badges. Tap one for its details and progress. */
+function Achievements() {
+  const p = useProgress();
+  const { width } = useWindowDimensions();
+  const [filter, setFilter] = useState<Filter>('all');
+  const [open, setOpen] = useState<AchievementDef | null>(null);
+  const earned = ACHIEVEMENTS.filter((a) => p.unlocked[a.id]).length;
+  const list = ACHIEVEMENTS.filter((a) => filter === 'all' || a.series === filter);
+  const colW = (Math.min(width, 560) - 32 - 12) / 2;
+  const chips = [{ key: 'all', label: 'All' }, ...ACHIEVEMENT_SERIES];
+  const st = open ? achievementState(p, open) : null;
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <Display size={20}>Your achievements</Display>
+        <T style={{ fontSize: 12.5, color: C.muted }}>
+          {earned} / {ACHIEVEMENTS.length} earned
+        </T>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+        {chips.map((c) => {
+          const on = filter === c.key;
+          return (
+            <Pressable key={c.key} onPress={() => setFilter(c.key)} accessibilityRole="button" accessibilityState={{ selected: on }}>
+              <View style={{ height: 38, paddingHorizontal: 16, borderRadius: 19, borderWidth: 2, borderColor: on ? C.blue : C.ink, backgroundColor: on ? C.blue : C.paper, justifyContent: 'center' }}>
+                <Text style={{ fontFamily: F.bodyMed, fontSize: 14.5, color: on ? C.white : C.ink }}>{c.label}</Text>
+              </View>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        {list.map((a) => {
+          const s = achievementState(p, a);
+          return (
+            <Pressable key={a.id} onPress={() => setOpen(a)} accessibilityRole="button" accessibilityLabel={`${a.name}, ${s.unlocked ? 'earned' : `${Math.min(s.value, a.goal)} of ${a.goal}`}`} style={{ width: colW }}>
+              <Card shadow={s.unlocked ? C.green : C.ink}>
+                <View style={{ alignItems: 'center', paddingVertical: 18, paddingHorizontal: 8, minHeight: 132, justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 30, opacity: s.unlocked ? 1 : 0.28 }}>{a.emoji}</Text>
+                  <T numberOfLines={2} style={{ fontFamily: F.bodyMed, fontSize: 14.5, textAlign: 'center', marginTop: 10, color: s.unlocked ? C.ink : C.muted }}>{a.name}</T>
+                  <T style={{ fontFamily: F.bodyBold, fontSize: 13, color: C.pink, marginTop: 2 }}>{s.unlocked ? '✅ Earned' : `${a.xp} XP`}</T>
+                </View>
+              </Card>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Sheet open={!!open} onClose={() => setOpen(null)} title={open?.name}>
+        {open && st && (
+          <View style={{ alignItems: 'center', gap: 8 }}>
+            <Text style={{ fontSize: 54, opacity: st.unlocked ? 1 : 0.35 }}>{open.emoji}</Text>
+            <T style={{ fontSize: 15, textAlign: 'center' }}>{open.desc}</T>
+            <T style={{ fontFamily: F.bodyBold, color: C.pink }}>{st.unlocked ? `Earned · +${open.xp} XP` : `+${open.xp} XP`}</T>
+            {!st.unlocked && (
+              <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <Bar pct={st.pct} color={C.blue} />
+                </View>
+                <Label>
+                  {Math.min(st.value, open.goal)} / {open.goal}
+                </Label>
+              </View>
+            )}
+          </View>
+        )}
+      </Sheet>
+    </View>
   );
 }

@@ -73,6 +73,12 @@ export const LEVEL_TITLES: [number, string][] = [
   [100, 'Chip Flip legend'], [75, 'Grandmaster'], [50, 'Master tactician'], [40, 'Champion'], [30, 'Strategist'],
   [20, 'Tactician'], [15, 'Blocker'], [10, 'Contender'], [5, 'Challenger'], [1, 'Rookie'],
 ];
+/** Total XP needed to reach `lvl`. */
+export function xpForLevel(lvl: number) {
+  let t = 0;
+  for (let l = 1; l < lvl; l++) t += levelCost(l);
+  return t;
+}
 export const levelTitle = (lvl: number) => LEVEL_TITLES.find(([n]) => lvl >= n)![1];
 export function levelOf(xp: number) {
   let level = 1;
@@ -242,8 +248,11 @@ function pickWeekly(id: string, key: string) {
 }
 const set = (key: string, ids: string[]): ChallengeSet => ({ key, ids, progress: {}, done: {}, bonus: false });
 
-const KEY = 'cf.progress';
+// Each player's progress is kept under their own key, so signing out and
+// back in on this phone brings it back.
+const LEGACY = 'cf.progress';
 let owner = 'local';
+const keyOf = (id: string) => `cf.progress.${id}`;
 
 function blank(): Progress {
   const d = dayKey();
@@ -255,7 +264,7 @@ let state: Progress = blank();
 const listeners = new Set<() => void>();
 function commit(p: Progress) {
   state = p;
-  kv.set(KEY, JSON.stringify(p));
+  kv.set(keyOf(owner), JSON.stringify(p));
   listeners.forEach((l) => l());
 }
 
@@ -299,8 +308,16 @@ export const progress = {
   },
   get: () => state,
   load(id = 'local') {
+    if (id === owner && state.processed.length) return;
+    // The first account on this phone takes over progress made before it.
+    for (const older of [LEGACY, keyOf('local')]) {
+      if (id !== 'local' && !kv.get(keyOf(id)) && kv.get(older)) {
+        kv.set(keyOf(id), kv.get(older)!);
+        kv.remove(older);
+      }
+    }
     owner = id;
-    const saved = kv.json<Progress | null>(KEY, null);
+    const saved = kv.json<Progress | null>(keyOf(id), null);
     state = saved?.v === 1 ? { ...blank(), ...saved, stats: { ...blankStats(), ...saved.stats } } : blank();
     state = rollover(state);
     listeners.forEach((l) => l());
@@ -398,7 +415,7 @@ export const progress = {
     if (state.last) commit({ ...state, last: null });
   },
   reset() {
-    kv.remove(KEY);
+    kv.remove(keyOf(owner));
     state = blank();
     listeners.forEach((l) => l());
   },

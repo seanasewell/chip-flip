@@ -2,7 +2,7 @@
 // spaces it changes.
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { cellLabel, isCorner } from '@/core/board';
@@ -11,6 +11,7 @@ import { FLIP_STAGGER, FLIP_START } from '@/lib/game';
 import { Chip } from './Chip';
 import { TileFace } from './Cards';
 import { Icon } from './icons';
+import { chipDrop, fadeIn } from './motion';
 import { C, sideColor, tint } from './theme';
 
 export interface BoardProps {
@@ -68,14 +69,14 @@ const Cell = memo(function Cell({ i, cell, owner, locked, flipDelay, target, dim
           <Icon name="smiley" size={cell * 0.68} stroke={2.4} />
         ) : owner === null || reveal ? (
           removed ? (
-            <Animated.View entering={FadeIn.duration(400)}>
+            <Animated.View entering={fadeIn(400)}>
               <TileFace cell={i} size={cell} dim={dim} />
             </Animated.View>
           ) : (
             <TileFace cell={i} size={cell} dim={dim} />
           )
         ) : (
-          <Animated.View key={`${i}-${owner}`} entering={isNew ? ZoomIn.springify().damping(12).stiffness(260) : undefined}>
+          <Animated.View key={`${i}-${owner}`} entering={isNew ? chipDrop : undefined}>
             <Chip side={owner} size={cell * 0.84} locked={locked} flipDelay={flipDelay} />
           </Animated.View>
         )}

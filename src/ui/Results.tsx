@@ -1,5 +1,5 @@
 import { ScrollView, Share, View } from 'react-native';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MODES } from '@/core/board';
@@ -9,6 +9,7 @@ import { game, useGame } from '@/lib/game';
 import { levelOf, progress } from '@/lib/progress';
 import { useEffect, useState } from 'react';
 import { LevelBadge } from './LevelBadge';
+import { fadeIn, fadeUp, pop } from './motion';
 import { Button, Card, Display, Label, Paper, T } from './kit';
 import { Avatar, Pips, SeatAvatar } from './Players';
 import { C, F, sideColor } from './theme';
@@ -47,14 +48,14 @@ export function Results() {
     <Paper>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 40, paddingHorizontal: 14, paddingBottom: 24, maxWidth: 480, width: '100%', alignSelf: 'center' }}>
         <View style={{ alignItems: 'center' }}>
-          <Animated.View entering={ZoomIn.springify().damping(10)} style={{ flexDirection: 'row' }}>
+          <Animated.View entering={pop()} style={{ flexDirection: 'row' }}>
             {winners.map((s, k) => (
               <View key={s.id} style={{ marginLeft: k ? -14 : 0 }}>
                 <Avatar glyph={s.glyph} hue={s.hue} size={teams ? 76 : 96} you={s.kind === 'you'} />
               </View>
             ))}
           </Animated.View>
-          <Animated.Text entering={ZoomIn.delay(250).springify()} style={{ position: 'absolute', top: -34, fontSize: 40 }}>
+          <Animated.Text entering={fadeIn(250, 200)} style={{ position: 'absolute', top: -34, fontSize: 40 }}>
             👑
           </Animated.Text>
           <Display size={30} style={{ textAlign: 'center', marginTop: 18 }}>
@@ -94,7 +95,7 @@ export function Results() {
         </View>
 
         {!casual && earned && levelOf(earned.xpFrom).level !== levelOf(earned.xpTo).level && (
-          <Animated.View entering={ZoomIn.delay(500).springify()} style={{ marginTop: 16 }}>
+          <Animated.View entering={pop(500)} style={{ marginTop: 16 }}>
             <Card shadow={C.green} bg={C.ink}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
                 <LevelBadge level={levelOf(earned.xpTo).level} size={46} />
@@ -111,7 +112,7 @@ export function Results() {
           {standings.map((s, i) => {
             const seats = s.seats.map((id) => seatById(m, id));
             return (
-              <Animated.View key={s.index} entering={FadeInDown.delay(200 + i * 70)}>
+              <Animated.View key={s.index} entering={fadeUp(200 + i * 70)}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderColor: C.ink, backgroundColor: C.white, paddingHorizontal: 12, paddingVertical: 8 }}>
                   <View style={{ flexDirection: 'row' }}>
                     {seats.map((x, k) => (
@@ -134,7 +135,7 @@ export function Results() {
           <View style={{ marginTop: 20, gap: 8 }}>
             <Label>Unlocked</Label>
             {[...earned.achievements, ...earned.challenges].map((a, i) => (
-              <Animated.View key={`${a.name}-${i}`} entering={FadeInDown.delay(400 + i * 90)}>
+              <Animated.View key={`${a.name}-${i}`} entering={fadeUp(400 + i * 90)}>
                 <Card offset={3}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 10 }}>
                     <T style={{ fontSize: 22 }}>{a.emoji}</T>

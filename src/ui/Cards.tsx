@@ -1,11 +1,12 @@
 // Board spaces and playing cards.
 import { memo, useEffect } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { LAYOUT, cardFace, faceLabel, isRemoveJack, isWildJack } from '@/core/board';
 import type { CardId, Suit } from '@/core/types';
+import { LIFT_MS, liftEasing, tagPop } from './motion';
 import { anton, C, F, SUIT_COLOR } from './theme';
 
 const SUIT_PATH: Record<Suit, string> = {
@@ -54,7 +55,7 @@ export function HandCard({ card, width, state, onPress, fresh = false }: { card:
   const pad = Math.max(3, Math.round(width * 0.07));
   const lift = useSharedValue(0);
   useEffect(() => {
-    lift.value = withSpring(sel ? -Math.round(h * 0.14) : 0, { damping: 14, stiffness: 320 });
+    lift.value = withTiming(sel ? -Math.round(h * 0.14) : 0, { duration: LIFT_MS, easing: liftEasing });
   }, [sel, h, lift]);
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: lift.value }] }));
   const label = `${faceLabel(k)}${wild ? ', wild: place anywhere' : remove ? ", removes an opponent's chip" : ''}${state === 'dead' ? ', dead card' : ''}${sel ? ', selected' : ''}`;
@@ -62,9 +63,9 @@ export function HandCard({ card, width, state, onPress, fresh = false }: { card:
     <Animated.View style={style}>
       {fresh && (
         <View pointerEvents="none" style={{ position: 'absolute', top: -9, left: 0, right: 0, alignItems: 'center', zIndex: 2 }}>
-          <View style={{ backgroundColor: C.green, borderWidth: 1.5, borderColor: C.ink, paddingHorizontal: 5 }}>
+          <Animated.View entering={tagPop} style={{ backgroundColor: C.green, borderWidth: 1.5, borderColor: C.ink, paddingHorizontal: 5 }}>
             <Text style={{ fontFamily: F.monoBold, fontSize: 8.5, color: C.ink, textTransform: 'uppercase' }}>New</Text>
-          </View>
+          </Animated.View>
         </View>
       )}
       <Pressable onPress={onPress} disabled={state === 'disabled'} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: sel, disabled: state === 'disabled' }}>

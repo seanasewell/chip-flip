@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BackHandler, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { fadeIn } from './motion';
 
 import type { GameModeId } from '@/core/types';
 import { useGame } from '@/lib/game';
@@ -55,6 +56,7 @@ export function ChipFlipApp() {
     key = `setup-${page.mode}`;
     screen = <Setup mode={page.mode} onBack={() => setPage(null)} />;
   } else if (page?.name === 'settings') {
+    tabs = true;
     key = 'settings';
     screen = <Settings onBack={() => setPage(null)} />;
   } else {
@@ -73,10 +75,18 @@ export function ChipFlipApp() {
   }
   return (
     <View style={{ flex: 1 }}>
-      <Animated.View key={key} entering={FadeIn.duration(200)} style={{ flex: 1 }}>
+      <Animated.View key={key} entering={fadeIn()} style={{ flex: 1 }}>
         {screen}
       </Animated.View>
-      {tabs && <TabBar tab={tab} onTab={openTab} />}
+      {tabs && (
+        <TabBar
+          tab={tab}
+          onTab={(t) => {
+            setPage(null);
+            openTab(t);
+          }}
+        />
+      )}
     </View>
   );
 }

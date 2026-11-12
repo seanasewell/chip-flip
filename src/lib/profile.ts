@@ -7,6 +7,7 @@ import { useSyncExternalStore } from 'react';
 
 import { kv } from './kv';
 import { progress } from './progress';
+import { linkProvider, signInWithProvider, type Provider, type SocialResult } from './social';
 import { supabase, supabaseConfigured } from './supabase';
 
 export interface Profile {
@@ -55,9 +56,15 @@ interface State {
   record: PlayerRecord;
   online: Online;
   userId: string | null;
+  /** Apple or Google when the player has saved their progress; null for guests. */
+  provider: Provider | null;
+  email: string | null;
+  /** Signed in with Apple or Google but no name chosen yet. */
+  needsName: string | null;
 }
 
-let state: State = { profile: null, record: blankRecord(), online: 'off', userId: null };
+const UID_KEY = 'cf.uid';
+let state: State = { profile: null, record: blankRecord(), online: 'off', userId: null, provider: null, email: null, needsName: null };
 let opponent: { opp: number; skill: number } | null = null;
 let connecting: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -106,6 +113,24 @@ async function sendPending() {
   if (last) saveRecord(fromRow(last));
 }
 
+/** Forgets the signed-in player on this phone (their XP and achievements
+ *  stay saved under their own key, for when they sign back in). */
+function clearLocal() {
+  [PROFILE_KEY, RECORD_KEY, PENDING_KEY, UID_KEY, 'cf.match', 'cf.rating'].forEach((k) => kv.remove(k));
+  opponent = null;
+  set({ profile: null, record: blankRecord(), needsName: null });
+}
+
+/** After linking: pick up the provider and email. */
+async function refreshUser() {
+  const { data } = await supabase.auth.getUser();
+  const u = data.user;
+  if (!u) return;
+  const providers: string[] = (u.app_metadata?.providers as string[] | undefined) ?? [];
+  const provider: Provider | null = providers.includes('apple') ? 'apple' : providers.includes('google') ? 'google' : null;
+  set({ provider, email: provider ? u.email ?? null : null });
+}
+
 async function fetchOpponent() {
   const { data, error } = await supabase.rpc('ranked_opponent');
   if (!error && data) opponent = data as { opp: number; skill: number };
@@ -121,8 +146,13 @@ async function doConnect() {
       if (error || !data.session) throw error ?? new Error('No session');
       s = { session: data.session };
     }
-    const uid = s.session!.user.id;
-    set({ userId: uid });
+    const user = s.session!.user;
+    const uid = user.id;
+    const providers: string[] = (user.app_metadata?.providers as string[] | undefined) ?? [];
+    const provider: Provider | null = providers.includes('apple') ? 'apple' : providers.includes('google') ? 'google' : null;
+    kv.set(UID_KEY, uid);
+    progress.load(uid);
+    set({ userId: uid, provider, email: provider ? user.email ?? null : null });
     // Profile: the server copy wins; a name chosen offline is sent up.
     const { data: row } = await supabase.from('profiles').select('name').eq('id', uid).maybeSingle();
     const local = state.profile;
@@ -132,6 +162,10 @@ async function doConnect() {
       set({ profile: p });
     } else if (!row && local) {
       await supabase.from('profiles').upsert({ id: uid, name: local.name });
+    } else if (!row && !local && provider) {
+      // New Apple/Google player: ask for a name, suggesting the one on the account.
+      const meta = user.user_metadata as { full_name?: string; name?: string } | undefined;
+      set({ needsName: (meta?.full_name || meta?.name || '').split(' ')[0].slice(0, 14) });
     }
     await sendPending();
     const { data: stats } = await supabase.from('player_stats').select('played, wins, losses, sequences, streak, best_streak').eq('user_id', uid).maybeSingle();
@@ -153,6 +187,7 @@ export const profile = {
   get: () => state,
   /** Reads the saved profile (after storage has loaded), then connects. */
   load() {
+    progress.load(kv.get(UID_KEY) ?? 'local');
     set({ profile: kv.json<Profile | null>(PROFILE_KEY, null), record: { ...blankRecord(), ...kv.json<Partial<PlayerRecord>>(RECORD_KEY, {}) } });
     void profile.connect();
   },
@@ -165,7 +200,7 @@ export const profile = {
   create(name: string) {
     const p: Profile = { id: state.userId ?? Math.random().toString(36).slice(2, 10), name: name.trim(), hue: 230, createdAt: Date.now() };
     kv.set(PROFILE_KEY, JSON.stringify(p));
-    set({ profile: p });
+    set({ profile: p, needsName: null });
     if (state.userId) void supabase.from('profiles').upsert({ id: state.userId, name: p.name });
     else void profile.connect();
   },
@@ -192,6 +227,33 @@ export const profile = {
     if (state.online === 'on') void sendPending();
     else void profile.connect();
   },
+  /** Save a guest's progress to Apple or Google: same player, same progress. */
+  async link(p: Provider): Promise<SocialResult> {
+    await profile.connect();
+    if (state.online !== 'on') return { kind: 'error', message: "Can't reach the server. Check your connection." };
+    const r = await linkProvider(p);
+    if (r.kind === 'ok') await refreshUser();
+    return r;
+  },
+  /** Sign in to a saved player with Apple or Google, replacing the guest on
+   *  this phone. Used from the welcome screen and after a link conflict. */
+  async signIn(p: Provider): Promise<SocialResult> {
+    const r = await signInWithProvider(p);
+    if (r.kind !== 'ok') return r;
+    clearLocal();
+    set({ online: 'off' });
+    await profile.connect();
+    return r;
+  },
+  /** Sign out of a saved player. The player stays on the server; this
+   *  phone goes back to the welcome screen. Guests can't sign out (they'd
+   *  lose everything), so they're offered Apple or Google instead. */
+  async signOut() {
+    if (!state.provider) return;
+    await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    clearLocal();
+    set({ online: 'off', userId: null, provider: null, email: null });
+  },
   /** Deletes the server account and everything on this device. */
   async deleteAccount(): Promise<boolean> {
     if (state.userId) {
@@ -199,10 +261,9 @@ export const profile = {
       if (error) return false;
       await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
     }
-    [PROFILE_KEY, RECORD_KEY, PENDING_KEY, 'cf.match', 'cf.rating'].forEach((k) => kv.remove(k));
     progress.reset();
-    opponent = null;
-    set({ profile: null, record: blankRecord(), online: 'off', userId: null });
+    clearLocal();
+    set({ online: 'off', userId: null, provider: null, email: null });
     return true;
   },
   /** Ranks tab: most ranked wins over a period, or longest current win streak. */

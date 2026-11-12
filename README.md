@@ -25,7 +25,9 @@ Scan the QR code with the iPhone camera to open the app in Expo Go. To pick up l
 - Tabs like the web prototype: Play, Ranks (live leaderboard from the server), Rewards (daily and weekly challenges, achievements) and Profile (level, XP, daily streak, stats), with Settings behind the gear.
 - Guest accounts on Supabase (project `chip-flip`): ranked results, streaks and the hidden rating are kept on the server. Migrations are in `supabase/migrations/`.
 
-Not yet: sign in with Apple or Google, online play, friends, ads and purchases.
+- Sign in with Apple or Google (or play as a guest and save progress later from Settings); sign out for saved players.
+
+Not yet: online play, friends, ads and purchases.
 
 ## Code
 

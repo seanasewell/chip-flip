@@ -3,15 +3,16 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { game } from '@/lib/game';
-import { ACHIEVEMENTS, XP_WAYS, dayKey, levelOf, progress, useProgress, weekStart, winPct } from '@/lib/progress';
+import { ACHIEVEMENTS, XP_WAYS, dayKey, levelOf, levelTitle, progress, useProgress, weekStart, winPct, xpForLevel } from '@/lib/progress';
 import { profile, useProfile } from '@/lib/profile';
 import { Bar } from './Bar';
 import { useSoundSettings } from './GameScreen';
 import { Icon } from './icons';
 import { Button, Card, Display, IconButton, Label, Paper, Row, Sheet, T, Toggle } from './kit';
-import { LevelBadge } from './LevelBadge';
+import { LevelBadge, TIER_LEVELS, tierColor } from './LevelBadge';
 import { Avatar } from './Players';
 import { RulesList } from './Rules';
+import { PROVIDER_NAME, ProviderButtons } from './SignIn';
 import { PageHeader } from './Tabs';
 import { anton, C, F } from './theme';
 
@@ -71,22 +72,8 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
         </View>
 
         <Card>
-          <Pressable onPress={() => setXpOpen(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14 }}>
-            <LevelBadge level={lvl.level} size={58} />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <Display size={20}>{lvl.title}</Display>
-                <Label style={{ fontSize: 10, opacity: 0.7 }}>
-                  {lvl.into} / {lvl.need} XP
-                </Label>
-              </View>
-              <View style={{ marginTop: 6 }}>
-                <Bar pct={lvl.need ? lvl.into / lvl.need : 1} color={C.blue} />
-              </View>
-              <T style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>
-                {lvl.toNext} XP to level {lvl.level + 1} ›
-              </T>
-            </View>
+          <Pressable onPress={() => setXpOpen(true)} accessibilityRole="button" accessibilityLabel={`Level ${lvl.level}, ${lvl.title}. See all levels`}>
+            <LevelCard xp={p.xp} />
           </Pressable>
         </Card>
 
@@ -146,15 +133,82 @@ export function Profile({ onSettings, onAchievements }: { onSettings: () => void
         </Card>
         <T style={{ textAlign: 'center', color: C.muted, fontSize: 12 }}>Stats count ranked matches only</T>
       </ScrollView>
-      <XpSheet open={xpOpen} onClose={() => setXpOpen(false)} />
+      <LevelSheet open={xpOpen} onClose={() => setXpOpen(false)} xp={p.xp} />
     </Paper>
+  );
+}
+
+function LevelCard({ xp }: { xp: number }) {
+  const lvl = levelOf(xp);
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14 }}>
+      <LevelBadge level={lvl.level} size={58} />
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Display size={20}>{lvl.title}</Display>
+          <Label style={{ fontSize: 10, opacity: 0.7 }}>
+            {lvl.into.toLocaleString()} / {lvl.need.toLocaleString()} XP
+          </Label>
+        </View>
+        <View style={{ marginTop: 6 }}>
+          <Bar pct={lvl.need ? lvl.into / lvl.need : 1} color={tierColor(lvl.level)} />
+        </View>
+        <T style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>{lvl.level >= 100 ? `Max level · ${xp.toLocaleString()} XP` : `${lvl.toNext.toLocaleString()} XP to level ${lvl.level + 1}`}</T>
+      </View>
+    </View>
+  );
+}
+
+/** Your level, every title tier and how to earn XP. */
+export function LevelSheet({ open, onClose, xp }: { open: boolean; onClose: () => void; xp: number }) {
+  const lvl = levelOf(xp);
+  const current = [...TIER_LEVELS].reverse().find((n) => lvl.level >= n)!;
+  const [ways, setWays] = useState(false);
+  return (
+    <Sheet open={open} onClose={onClose} title="Level">
+      <Card>
+        <LevelCard xp={xp} />
+      </Card>
+      <Label style={{ marginTop: 18, marginBottom: 8, opacity: 0.7 }}>Levels</Label>
+      <View style={{ gap: 8 }}>
+        {TIER_LEVELS.map((n) => {
+          const isCur = n === current;
+          const reached = n < current;
+          return (
+            <Card key={n} offset={3}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderLeftWidth: isCur ? 6 : 0, borderColor: C.blue }}>
+                <LevelBadge level={n} size={44} />
+                <View style={{ flex: 1 }}>
+                  <Display size={17}>{levelTitle(n)}</Display>
+                  <T style={{ fontSize: 12.5, color: isCur ? C.ink : C.muted }}>Level {n}</T>
+                </View>
+                {isCur ? (
+                  <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>Current</T>
+                ) : reached ? (
+                  <T style={{ fontSize: 18 }}>✅</T>
+                ) : (
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <T style={{ fontFamily: F.bodyBold, fontSize: 14 }}>{xpForLevel(n).toLocaleString()} XP</T>
+                    <T style={{ fontSize: 11.5, color: C.muted }}>total</T>
+                  </View>
+                )}
+              </View>
+            </Card>
+          );
+        })}
+      </View>
+      <View style={{ marginTop: 14 }}>
+        <Row icon="check" title="How to earn XP" onPress={() => setWays(true)} right={<Icon name="arrow" size={16} />} />
+      </View>
+      <XpSheet open={ways} onClose={() => setWays(false)} />
+    </Sheet>
   );
 }
 
 export function Settings({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   const s = useSoundSettings();
-  const { profile: me, online } = useProfile();
+  const { profile: me, provider, email } = useProfile();
   const [name, setName] = useState(me?.name ?? '');
   const [sheet, setSheet] = useState<null | 'rules' | 'xp'>(null);
   const [confirm, setConfirm] = useState(false);
@@ -170,18 +224,27 @@ export function Settings({ onBack }: { onBack: () => void }) {
         <Display size={30}>Settings</Display>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24, gap: 8, maxWidth: 560, width: '100%', alignSelf: 'center' }} keyboardShouldPersistTaps="handled">
-        <Card>
-          <View style={{ padding: 14 }}>
-            <Display size={20}>Save your progress</Display>
-            <T style={{ fontSize: 13.5, lineHeight: 19, color: C.muted, marginTop: 4 }}>
-              You’re playing as a guest. Your level, wins and achievements are kept on this phone{online === 'on' ? ', and your ranked record is saved to your guest account' : ''}. Signing in with Apple or Google, so you can keep them if you change phones, is coming soon.
-            </T>
-          </View>
-        </Card>
+        {provider ? null : (
+          <Card>
+            <View style={{ padding: 14, gap: 12 }}>
+              <View>
+                <Display size={20}>Save your progress</Display>
+                <T style={{ fontSize: 13.5, lineHeight: 19, color: C.muted, marginTop: 4 }}>You’re playing as a guest. Sign in to keep your level, wins and achievements if you change or lose your phone.</T>
+              </View>
+              <ProviderButtons mode="link" />
+            </View>
+          </Card>
+        )}
 
         <Label style={{ marginTop: 14 }}>Account</Label>
         <Card shadow={null}>
           <View style={{ padding: 14 }}>
+            {provider && (
+              <T style={{ fontSize: 13, color: C.muted, marginBottom: 10 }}>
+                ✅ Progress saved with {PROVIDER_NAME[provider]}
+                {email ? ` (${email})` : ''}
+              </T>
+            )}
             <T style={{ fontSize: 12.5, color: C.muted, marginBottom: 6 }}>Display name</T>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TextInput
@@ -206,6 +269,18 @@ export function Settings({ onBack }: { onBack: () => void }) {
         <Row icon="check" title="How XP works" onPress={() => setSheet('xp')} right={<Icon name="arrow" size={16} />} />
 
         <Label style={{ marginTop: 14 }}>Data</Label>
+        {provider && (
+          <Row
+            icon="door"
+            title="Sign out"
+            sub={`Signed in with ${PROVIDER_NAME[provider]}${email ? ` · ${email}` : ''}`}
+            onPress={async () => {
+              game.exit();
+              await profile.signOut();
+              onBack();
+            }}
+          />
+        )}
         {confirm ? (
           <View style={{ borderWidth: 2, borderColor: C.red, padding: 12, backgroundColor: C.paper }}>
             <T style={{ fontSize: 14, lineHeight: 20 }}>This deletes your name, level, record, achievements and saved match from this phone and from the Chip Flip server. It can’t be undone.</T>

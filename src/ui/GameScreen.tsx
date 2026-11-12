@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MODES, isRemoveJack, isWildJack } from '@/core/board';
@@ -12,6 +12,7 @@ import { CardBack, HandCard, type CardState } from './Cards';
 import { Icon } from './icons';
 import { Badge, Button, Card, Display, IconButton, Label, Paper, Row, Sheet, T, Toggle } from './kit';
 import { PlayerStrip, SeatAvatar } from './Players';
+import { dealIn, fadeIn, fadeOut, fadeUp, pop } from './motion';
 import { Results } from './Results';
 import { RulesList } from './Rules';
 import { musicEnabled, onSoundChange, setMusicEnabled, setSoundEnabled, soundEnabled } from './sound';
@@ -145,7 +146,7 @@ function StatusLine({ m, cur, myTurn, selected, thinking, handoff }: { m: MatchS
   } else if (thinking) text = `${cur.name} is thinking…`;
   else text = turn;
   return (
-    <Animated.View key={`${cur.id}-${m.phase}-${selected ?? ''}-${myTurn}`} entering={FadeIn.duration(180)} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLiveRegion="polite">
+    <Animated.View key={`${cur.id}-${m.phase}-${selected ?? ''}-${myTurn}`} entering={fadeIn()} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLiveRegion="polite">
       <Label numberOfLines={1} style={{ flexShrink: 1, fontSize: 9.5 }}>
         {text}
       </Label>
@@ -188,7 +189,7 @@ function HandArea({ m, seat, myTurn, selected, reveal, onReveal, width, bottom }
               const state: CardState = !myTurn ? 'disabled' : selected === card ? 'selected' : isDead(m, card) ? 'dead' : 'available';
               const nu = isFresh(card);
               return (
-                <Animated.View key={nu ? `${card}-${fresh!.key}` : card} entering={nu ? FadeInUp.springify().damping(14) : undefined}>
+                <Animated.View key={nu ? `${card}-${fresh!.key}` : card} entering={nu ? dealIn : undefined}>
                   <HandCard card={card} width={cardW} state={state} fresh={nu} onPress={() => game.selectCard(card)} />
                 </Animated.View>
               );
@@ -221,8 +222,8 @@ function Intro({ m }: { m: MatchState }) {
     return () => ts.forEach(clearTimeout);
   }, []);
   return (
-    <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(200)} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(17,17,17,0.4)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
-      <Animated.View entering={ZoomIn.springify().damping(14)} style={{ width: '100%', maxWidth: 360 }}>
+    <Animated.View entering={fadeIn(150)} exiting={fadeOut(200)} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(17,17,17,0.4)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
+      <Animated.View entering={pop()} style={{ width: '100%', maxWidth: 360 }}>
         <Card>
           <View style={{ padding: 16 }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
@@ -256,9 +257,9 @@ function Intro({ m }: { m: MatchState }) {
 
 function Handoff({ seat }: { seat: Seat }) {
   return (
-    <Animated.View entering={FadeIn.duration(200)} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
+    <Animated.View entering={fadeIn()} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
       <Paper dark style={{ justifyContent: 'center', paddingHorizontal: 28 }}>
-        <Animated.View entering={FadeInDown.duration(300)} style={{ width: '100%', maxWidth: 360, alignSelf: 'center' }}>
+        <Animated.View entering={fadeUp()} style={{ width: '100%', maxWidth: 360, alignSelf: 'center' }}>
           <Label style={{ color: 'rgba(255,253,246,0.8)' }}>(Pass) Cards stay hidden</Label>
           <View style={{ marginTop: 12 }}>
             <Display size={54} style={{ color: C.blue }}>Pass the</Display>
@@ -287,7 +288,7 @@ function Hint({ top }: { top: number }) {
   if (!h) return null;
   return (
     <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top, alignItems: 'center', paddingHorizontal: 24 }}>
-      <Animated.View key={h.id} entering={ZoomIn.springify().damping(14)} exiting={FadeOut} style={{ width: '100%', maxWidth: 330 }}>
+      <Animated.View key={h.id} entering={pop()} exiting={fadeOut()} style={{ width: '100%', maxWidth: 330 }}>
         <Card shadow={C.ink} offset={3} bg={C.orange}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10 }} accessibilityLiveRegion="assertive">
             <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' }}>

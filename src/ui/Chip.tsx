@@ -2,7 +2,7 @@
 // completed sequence flips over to show a crown.
 import { memo, useEffect } from 'react';
 import { View } from 'react-native';
-import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 
 import { FLIP_MS } from '@/lib/game';
@@ -53,24 +53,17 @@ export const Chip = memo(function Chip({ side, size, locked = false, flipDelay =
   useEffect(() => {
     const to = locked ? 1 : 0;
     if (p.value === to) return;
-    p.value = withDelay(flipDelay, withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.45, 0, 0.2, 1) }));
+    p.value = withDelay(flipDelay, withTiming(to, { duration: FLIP_MS, easing: Easing.bezier(0.3, 1.25, 0.5, 1) }));
   }, [locked, flipDelay, p]);
-  // A flip drawn as a squash: the chip narrows to its edge, swaps faces, and
-  // opens back up (with a little lift), so it works the same on every platform.
-  const front = useAnimatedStyle(() => ({
-    opacity: p.value < 0.5 ? 1 : 0,
-    transform: [{ scaleX: Math.abs(Math.cos(p.value * Math.PI)) }, { scale: interpolate(p.value, [0, 0.5, 1], [1, 1.18, 1]) }],
-  }));
-  const back = useAnimatedStyle(() => ({
-    opacity: p.value >= 0.5 ? 1 : 0,
-    transform: [{ scaleX: Math.abs(Math.cos(p.value * Math.PI)) }, { scale: interpolate(p.value, [0, 0.5, 1], [1, 1.18, 1]) }],
-  }));
+  // A real 3D flip, as on the web: each face hides when it turns away.
+  const front = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${p.value * 180}deg` }] }));
+  const back = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${180 + p.value * 180}deg` }] }));
   return (
     <View style={{ width: size, height: size }}>
-      <Animated.View style={[{ position: 'absolute' }, front]}>
+      <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, front]}>
         <ChipIcon color={c} size={size} mark={0.34} stroke={bw} />
       </Animated.View>
-      <Animated.View style={[{ position: 'absolute' }, back]}>
+      <Animated.View style={[{ position: 'absolute', backfaceVisibility: 'hidden' }, back]}>
         <CrownChip color={c.base} size={size} stroke={bw} />
       </Animated.View>
     </View>

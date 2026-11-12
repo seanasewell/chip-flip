@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MODES } from '@/core/board';
@@ -12,6 +12,7 @@ import { Badge, Card, Display, Paper, T } from './kit';
 import { LevelBadge } from './LevelBadge';
 import { Wordmark } from './Logo';
 import { Marquee } from './Marquee';
+import { fadeUp } from './motion';
 import { MODE_COPY } from './Setup';
 import { C, F, applySideColors, sideColor } from './theme';
 
@@ -66,7 +67,7 @@ export function Home({ onMode, onLevel }: { onMode: (m: GameModeId) => void; onL
 
           <Card>
             {ORDER.map((id, i) => (
-              <Animated.View key={id} entering={FadeInDown.delay(i * 50)} style={{ borderTopWidth: i ? 2 : 0, borderColor: C.ink }}>
+              <Animated.View key={id} entering={fadeUp(i * 50)} style={{ borderTopWidth: i ? 2 : 0, borderColor: C.ink }}>
                 <ModeRow id={id} badge={id === 'h2h' ? 'Most popular' : undefined} onPress={() => onMode(id)} />
               </Animated.View>
             ))}

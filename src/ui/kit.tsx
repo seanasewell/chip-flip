@@ -2,11 +2,12 @@
 // shadows, buttons, labels, segmented controls, toggles and bottom sheets.
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
 import { Icon, type IconName } from './icons';
+import { fadeIn, fadeOut, sheetDown, sheetUp } from './motion';
 import { C, F, anton } from './theme';
 
 /** Cream paper with a faint grid, behind every screen. */
@@ -163,10 +164,10 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
     <Modal visible={open} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
       {open && (
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <Animated.View entering={FadeIn.duration(160)} exiting={FadeOut.duration(140)} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(17,17,17,0.45)' }]}>
+          <Animated.View entering={fadeIn(160)} exiting={fadeOut(140)} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(17,17,17,0.45)' }]}>
             <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityLabel="Close" />
           </Animated.View>
-          <Animated.View entering={SlideInDown.duration(240)} exiting={SlideOutDown.duration(180)} style={{ backgroundColor: C.bg, borderTopWidth: 2, borderColor: C.ink, maxHeight: '88%' }}>
+          <Animated.View entering={sheetUp} exiting={sheetDown} style={{ backgroundColor: C.bg, borderTopWidth: 2, borderColor: C.ink, maxHeight: '88%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 }}>
               <Display size={22} style={{ flex: 1 }}>
                 {title}

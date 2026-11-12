@@ -3,7 +3,7 @@
 // and blue ones take their place, then all five flip over to crowns.
 import { useEffect } from 'react';
 import { Image, View } from 'react-native';
-import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 const LOGO = require('@/assets/images/logo.png');
 const BLUE = require('@/assets/images/blue.png');
@@ -11,14 +11,20 @@ const PINK = require('@/assets/images/pink.png');
 const ORANGE = require('@/assets/images/orange.png');
 const CROWN = require('@/assets/images/crown.png');
 const TEXT = require('@/assets/images/text.png');
+const PINK_BLUR = require('@/assets/images/pink_blur.png');
+const ORANGE_BLUR = require('@/assets/images/orange_blur.png');
 
 export function Wordmark({ height = 40 }: { height?: number }) {
   return <Image source={LOGO} style={{ height, width: height * (823 / 312) }} resizeMode="contain" accessibilityLabel="Chip Flip" />;
 }
 
+// Same timeline and keyframes as the web prototype's welcome logo.
 const D = 2000; // the chips wait 2 s after the screen appears; the name is there from the start
+const POP = Easing.bezier(0.2, 0.9, 0.3, 1);
+const OUT = Easing.bezier(0.5, 0, 0.75, 0.4);
+const FLIP = Easing.bezier(0.45, 0, 0.25, 1);
 
-function LogoChip({ i, size, x, start }: { i: number; size: number; x: number; start: number }) {
+function LogoChip({ i, size, x, start, blur }: { i: number; size: number; x: number; start: number; blur?: number }) {
   const swaps = start !== BLUE;
   const swapAt = D + (i === 1 ? 1900 : 3900);
   const pop = useSharedValue(0);
@@ -26,46 +32,56 @@ function LogoChip({ i, size, x, start }: { i: number; size: number; x: number; s
   const inn = useSharedValue(swaps ? 0 : 1);
   const flip = useSharedValue(0);
   useEffect(() => {
-    pop.value = withDelay(D + i * 180, withSpring(1, { damping: 9, stiffness: 180 }));
+    pop.value = withDelay(D + i * 180, withTiming(1, { duration: 520, easing: POP }));
     if (swaps) {
-      out.value = withDelay(swapAt, withTiming(1, { duration: 900, easing: Easing.bezier(0.5, 0, 0.75, 0.4) }));
-      inn.value = withDelay(swapAt + 1500, withSpring(1, { damping: 10, stiffness: 200 }));
+      out.value = withDelay(swapAt, withTiming(1, { duration: 900, easing: OUT }));
+      // A pause after the burst, then the blue chip pops into the empty spot.
+      inn.value = withDelay(swapAt + 1500, withTiming(1, { duration: 520, easing: POP }));
     }
-    flip.value = withDelay(D + 6300 + i * 140, withTiming(1, { duration: 900, easing: Easing.bezier(0.45, 0, 0.2, 1) }));
+    flip.value = withDelay(D + 6300 + i * 140, withTiming(1, { duration: 900, easing: FLIP }));
   }, [i, swaps, swapAt, pop, out, inn, flip]);
 
-  const wrap = useAnimatedStyle(() => ({
-    opacity: Math.min(1, pop.value * 1.5),
+  // Pop in: 0.3 → 1.1 → 1 while fading in.
+  const popStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pop.value, [0, 0.7, 1], [0, 1, 1], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(pop.value, [0, 0.7, 1], [0.3, 1.1, 1], Extrapolation.CLAMP) }],
+  }));
+  // The flip turns the chip over in 3D; each face hides when turned away.
+  const front = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${flip.value * 180}deg` }] }));
+  const back = useAnimatedStyle(() => ({ transform: [{ perspective: size * 5 }, { rotateY: `${180 + flip.value * 180}deg` }] }));
+  // The dissolve: brightens, swells and spins away into a blur.
+  const burst = useAnimatedStyle(() => ({
     transform: [
-      { translateY: interpolate(pop.value, [0, 1], [-size * 0.5, 0]) },
-      { scale: pop.value },
-      { scaleX: Math.abs(Math.cos(flip.value * Math.PI)) },
-      { scale: interpolate(flip.value, [0, 0.5, 1], [1, 1.15, 1]) },
+      { scale: interpolate(out.value, [0, 0.25, 1], [1, 1.12, 1.7]) },
+      { rotate: `${interpolate(out.value, [0, 0.25, 1], [0, -6, 18])}deg` },
     ],
   }));
-  const front = useAnimatedStyle(() => ({ opacity: flip.value < 0.5 ? 1 : 0 }));
-  const back = useAnimatedStyle(() => ({ opacity: flip.value >= 0.5 ? 1 : 0 }));
-  // The dissolve: swells and spins away as it fades.
-  const outStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(out.value, [0, 0.25, 1], [1, 1, 0]),
-    transform: [{ scale: interpolate(out.value, [0, 0.25, 1], [1, 1.12, 1.7]) }, { rotate: `${interpolate(out.value, [0, 0.25, 1], [0, -6, 18])}deg` }],
+  const sharp = useAnimatedStyle(() => ({ opacity: interpolate(out.value, [0, 0.2, 0.55], [1, 1, 0], Extrapolation.CLAMP) }));
+  const soft = useAnimatedStyle(() => ({ opacity: interpolate(out.value, [0, 0.2, 0.55, 1], [0, 0.35, 0.9, 0], Extrapolation.CLAMP) }));
+  const inStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(inn.value, [0, 0.7, 1], [0, 1, 1], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(inn.value, [0, 0.7, 1], [0.6, 1.08, 1], Extrapolation.CLAMP) }],
   }));
-  const inStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, inn.value * 1.5), transform: [{ scale: inn.value }] }));
+  const face = { position: 'absolute' as const, left: 0, top: 0, width: size, height: size, backfaceVisibility: 'hidden' as const };
   const img = { position: 'absolute' as const, width: size, height: size };
+  const big = size * (355 / 155);
 
   return (
-    <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size }, wrap]}>
-      <Animated.View style={[{ position: 'absolute', width: size, height: size }, front]}>
+    <Animated.View style={[{ position: 'absolute', left: x, top: 0, width: size, height: size }, popStyle]}>
+      <Animated.View style={[face, front]}>
         {swaps ? (
           <>
             <Animated.Image source={BLUE} style={[img, inStyle]} />
-            <Animated.Image source={start} style={[img, outStyle]} />
+            <Animated.View style={[{ position: 'absolute', width: size, height: size }, burst]}>
+              <Animated.Image source={blur} style={[{ position: 'absolute', width: big, height: big, left: (size - big) / 2, top: (size - big) / 2 }, soft]} />
+              <Animated.Image source={start} style={[img, sharp]} />
+            </Animated.View>
           </>
         ) : (
           <Image source={BLUE} style={img} />
         )}
       </Animated.View>
-      <Animated.View style={[{ position: 'absolute', width: size, height: size }, back]}>
+      <Animated.View style={[face, back]}>
         <Image source={CROWN} style={img} />
       </Animated.View>
     </Animated.View>
@@ -76,11 +92,12 @@ export function WelcomeLogo({ width = 220 }: { width?: number }) {
   const k = width / 823;
   const xs = [0, 167, 333, 500, 667];
   const starts = [BLUE, PINK, BLUE, BLUE, ORANGE];
+  const blurs = [undefined, PINK_BLUR, undefined, undefined, ORANGE_BLUR];
   const size = Math.round(155 * k);
   return (
     <View accessibilityRole="image" accessibilityLabel="Chip Flip" style={{ width, height: Math.round(312 * k) }}>
       {xs.map((x, i) => (
-        <LogoChip key={i} i={i} x={Math.round(x * k)} size={size} start={starts[i]} />
+        <LogoChip key={i} i={i} x={Math.round(x * k)} size={size} start={starts[i]} blur={blurs[i]} />
       ))}
       <Image source={TEXT} style={{ position: 'absolute', left: 0, top: Math.round(192 * k), width: Math.round(822 * k), height: Math.round(120 * k) }} />
     </View>
