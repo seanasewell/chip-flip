@@ -7,8 +7,9 @@ import Svg, { Path } from 'react-native-svg';
 
 import { cellLabel, isCorner } from '@/core/board';
 import { BOARD_SIZE, type CellOwner, type Move, type Sequence } from '@/core/types';
-import { FLIP_STAGGER, FLIP_START } from '@/lib/game';
+import { FLIP_MS, FLIP_STAGGER, FLIP_START } from '@/lib/game';
 import { ChipBurst } from './Burst';
+import { SequenceConfetti } from './Confetti';
 import { Chip } from './Chip';
 import { TileFace } from './Cards';
 import { Icon } from './icons';
@@ -112,6 +113,16 @@ export function Board({ board, size, sequences, fresh = [], lastMove = null, tar
     timers.current.push(setTimeout(() => setBursts((b) => b.filter((x) => !gone.some((g) => g.key === x.key))), 1000));
   }, [board]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  // Confetti for each new sequence, once (not again when the board redraws).
+  const seen = useRef(new Set(fresh.map((q) => q.cells.join())));
+  const [parties, setParties] = useState<{ key: string; cells: number[] }[]>([]);
+  useEffect(() => {
+    const novel = fresh.filter((q) => !seen.current.has(q.cells.join()));
+    if (!novel.length) return;
+    novel.forEach((q) => seen.current.add(q.cells.join()));
+    timers.current.push(setTimeout(() => setParties((p) => [...p, ...novel.map((q) => ({ key: q.cells.join(), cells: q.cells }))]), 0));
+    timers.current.push(setTimeout(() => setParties((p) => p.filter((x) => !novel.some((q) => q.cells.join() === x.key))), FLIP_START + 4 * FLIP_STAGGER + FLIP_MS + 2000));
+  }, [fresh]);
   if (!size) return null;
   const pad = Math.max(4, Math.round(size * 0.016));
   const gap = Math.max(2, Math.round(size * 0.008));
@@ -167,6 +178,11 @@ export function Board({ board, size, sequences, fresh = [], lastMove = null, tar
     <View style={{ width: size + 5, height: size + 5 }} accessibilityLabel="Board">
       <View style={{ position: 'absolute', left: 5, top: 5, width: size, height: size, backgroundColor: C.blue }} />
       <View style={{ width: size, height: size, padding: pad, backgroundColor: C.ink, gap }}>{rows}</View>
+      {parties.map((q) => {
+        const center = (c: number) => ({ x: pad + (c % BOARD_SIZE) * (cell + gap) + cell / 2, y: pad + Math.floor(c / BOARD_SIZE) * (cell + gap) + cell / 2 });
+        // Launches as the last chip finishes flipping.
+        return <SequenceConfetti key={q.key} a={center(q.cells[0])} b={center(q.cells[4])} cell={cell} delay={FLIP_START + 4 * FLIP_STAGGER + FLIP_MS - 150} />;
+      })}
       {!reveal &&
         bursts.map((b) => {
           const r = Math.floor(b.cell / BOARD_SIZE);
