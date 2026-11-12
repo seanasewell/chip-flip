@@ -54,7 +54,7 @@ export function Welcome() {
                 <Display size={44} style={{ marginTop: 14 }}>
                   What should{'\n'}we call you?
                 </Display>
-                <T style={{ marginTop: 8, color: C.muted, fontSize: 14 }}>Shown to the other players at the table. You can change it later in Settings.</T>
+                <T style={{ marginTop: 14, color: C.muted, fontSize: 14 }}>Shown to the other players at the table. You can change it later in Settings.</T>
                 <TextInput
                   value={name}
                   onChangeText={(t) => setName(t.slice(0, 14))}
