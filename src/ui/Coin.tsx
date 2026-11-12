@@ -10,7 +10,7 @@ const SLICES = 10;
 const INK = '#111111';
 
 export function FlipCoin({ p, size, front, back, edge, outline = INK }: { p: SharedValue<number>; size: number; front: React.ReactNode; back: React.ReactNode; edge: string; /** Rim outline (ink for board chips; the logo's chips have none). */ outline?: string }) {
-  const thick = Math.max(4, size * 0.24);
+  const thick = Math.max(3, size * 0.15);
   const bw = Math.max(1.5, size * 0.06);
 
   const lift = useAnimatedStyle(() => {

@@ -131,10 +131,17 @@ function Achievements() {
           return (
             <Pressable key={a.id} onPress={() => setOpen(a)} accessibilityRole="button" accessibilityLabel={`${a.name}, ${s.unlocked ? 'earned' : `${Math.min(s.value, a.goal)} of ${a.goal}`}`} style={{ width: colW }}>
               <Card shadow={s.unlocked ? C.green : C.ink}>
-                <View style={{ alignItems: 'center', paddingVertical: 18, paddingHorizontal: 8, minHeight: 132, justifyContent: 'center' }}>
+                <View style={{ alignItems: 'center', paddingTop: 18, paddingBottom: 14, paddingHorizontal: 12, minHeight: 150, justifyContent: 'center' }}>
+                  {s.unlocked && <Text style={{ position: 'absolute', top: 6, right: 7, fontSize: 16 }}>✅</Text>}
                   <Text style={{ fontSize: 30, opacity: s.unlocked ? 1 : 0.28 }}>{a.emoji}</Text>
                   <T numberOfLines={2} style={{ fontFamily: F.bodyMed, fontSize: 14.5, textAlign: 'center', marginTop: 10, color: s.unlocked ? C.ink : C.muted }}>{a.name}</T>
-                  <T style={{ fontFamily: F.bodyBold, fontSize: 13, color: C.pink, marginTop: 2 }}>{s.unlocked ? '✅ Earned' : `${a.xp} XP`}</T>
+                  <View style={{ alignSelf: 'stretch', marginTop: 8, gap: 4 }}>
+                    <Bar pct={s.pct} color={s.unlocked ? C.green : C.blue} height={9} />
+                    <Label style={{ fontSize: 9, opacity: 0.7, textAlign: 'center' }}>
+                      {Math.min(s.value, a.goal)} / {a.goal}
+                    </Label>
+                  </View>
+                  <T style={{ fontFamily: F.bodyBold, fontSize: 13, color: C.pink, marginTop: 4 }}>{a.xp} XP</T>
                 </View>
               </Card>
             </Pressable>
