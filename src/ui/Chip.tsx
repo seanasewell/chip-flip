@@ -48,8 +48,10 @@ export function CrownChip({ color, size, stroke = 1.5 }: { color: string; size: 
 export const Chip = memo(function Chip({ side, size, locked = false, flipDelay = 0 }: { side: number; size: number; locked?: boolean; flipDelay?: number }) {
   const c = sideColor(side);
   const bw = Math.max(1.5, size * 0.07);
-  // 0 = face up, 1 = crown. Chips that were already locked start flipped.
-  const p = useSharedValue(locked ? 1 : 0);
+  // 0 = face up, 1 = crown. Chips already in a sequence start flipped; a
+  // chip that just completed one (it has a flip delay) lands face up and
+  // flips with the rest of its line.
+  const p = useSharedValue(locked && flipDelay === 0 ? 1 : 0);
   useEffect(() => {
     const to = locked ? 1 : 0;
     if (p.value === to) return;

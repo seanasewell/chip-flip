@@ -60,9 +60,10 @@ interface Saved {
   activeMs?: number;
 }
 
-// A new sequence's chips flip one by one (120ms + 220ms each, 1.1s flip),
+// A new sequence's chips flip one by one (480ms + 220ms each, 1.1s flip),
 // so the cheer waits until the last chip has landed.
-export const FLIP_START = 120;
+// The flips start once the last chip has dropped into place (380 ms).
+export const FLIP_START = 480;
 export const FLIP_STAGGER = 220;
 export const FLIP_MS = 1100;
 const FLIP_DONE = FLIP_START + 4 * FLIP_STAGGER + FLIP_MS + 60;
