@@ -12,7 +12,7 @@ import { CardBack, HandCard, type CardState } from './Cards';
 import { Icon } from './icons';
 import { Badge, Button, Card, Display, IconButton, Label, Paper, Row, Sheet, T, Toggle } from './kit';
 import { PlayerStrip, SeatAvatar } from './Players';
-import { dealIn, fadeIn, fadeOut, fadeUp, pop } from './motion';
+import { Spin, dealIn, fadeIn, fadeOut, fadeUp, pop } from './motion';
 import { Results } from './Results';
 import { RulesList } from './Rules';
 import { musicEnabled, onSoundChange, setMusicEnabled, setSoundEnabled, soundEnabled } from './sound';
@@ -238,7 +238,9 @@ function Intro({ m }: { m: MatchState }) {
               ))}
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16 }}>
-              <Icon name="hourglass" size={13} />
+              <Spin>
+                <Icon name="hourglass" size={13} />
+              </Spin>
               <Label style={{ flex: 1 }}>Shuffling 104 cards</Label>
               <Label>{Math.round(pct * 100)}%</Label>
             </View>

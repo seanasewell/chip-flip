@@ -70,3 +70,5 @@ export const sheetDown = new Keyframe({
 /** Selected card lift: 140 ms with a hint of overshoot. */
 export const LIFT_MS = 140;
 export const liftEasing = Easing.bezier(0.2, 0.9, 0.3, 1.2);
+
+export { Spin } from './Spin';
