@@ -71,7 +71,7 @@ function Table() {
               {g.config?.casual ? 'Casual · ' : ''}First to {toWin(m)} {toWin(m) === 1 ? 'chip flip' : 'chip flips'}
             </Label>
           </View>
-          {DEV_TOOLS && <IconButton name="wrench" onPress={() => setMenu('dev')} label="Developer controls" />}
+          {DEV_TOOLS && <IconButton name="settings" onPress={() => setMenu('dev')} label="Developer controls" />}
           <SoundButton />
         </View>
 
