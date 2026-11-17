@@ -12,16 +12,29 @@ import { C, F, anton } from './theme';
 
 /** Cream paper with a faint grid, behind every screen. */
 export function Paper({ children, style, dark = false }: { children?: React.ReactNode; style?: StyleProp<ViewStyle>; dark?: boolean }) {
+  // Each grid gets its own pattern id (screens stack, e.g. the hand-off over
+  // the board) and is drawn at the measured size, so it always reaches the
+  // edges, even after the layout changes.
+  const id = `grid${React.useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const [box, setBox] = React.useState({ w: 0, h: 0 });
   return (
-    <View style={[{ flex: 1, backgroundColor: dark ? C.ink : C.bg }, style]}>
-      <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Defs>
-          <Pattern id="grid" width={28} height={28} patternUnits="userSpaceOnUse">
-            <Path d="M28 0H0V28" stroke={dark ? 'rgba(255,253,246,0.06)' : C.grid} strokeWidth={1} fill="none" />
-          </Pattern>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#grid)" />
-      </Svg>
+    <View
+      style={[{ flex: 1, backgroundColor: dark ? C.ink : C.bg }, style]}
+      onLayout={(e) => {
+        const { width: w, height: h } = e.nativeEvent.layout;
+        setBox((b) => (b.w === w && b.h === h ? b : { w, h }));
+      }}
+    >
+      {box.w > 0 && (
+        <Svg width={box.w} height={box.h} style={{ position: 'absolute', left: 0, top: 0 }} pointerEvents="none">
+          <Defs>
+            <Pattern id={id} width={28} height={28} patternUnits="userSpaceOnUse">
+              <Path d="M28 0H0V28" stroke={dark ? 'rgba(255,253,246,0.06)' : C.grid} strokeWidth={1} fill="none" />
+            </Pattern>
+          </Defs>
+          <Rect x={0} y={0} width={box.w} height={box.h} fill={`url(#${id})`} />
+        </Svg>
+      )}
       {children}
     </View>
   );
