@@ -15,6 +15,7 @@ import { Avatar } from './Players';
 import { RulesList } from './Rules';
 import { PROVIDER_NAME, ProviderButtons } from './SignIn';
 import { PageHeader } from './Tabs';
+import { AdvertisementsSection } from './RemoveAds';
 import { tutorial } from './Tutorial';
 import { anton, C, F } from './theme';
 
@@ -306,6 +307,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
         <Label style={{ marginTop: 14 }}>Settings</Label>
         <Row icon="sound" title="Sound effects" right={<Toggle on={s.sound} onChange={s.setSound} label="Sound effects" />} />
         <Row icon="music" title="Music" sub="Plays during matches" right={<Toggle on={s.music} onChange={s.setMusic} label="Music" />} />
+
+        <View style={{ marginTop: 14 }}>
+          <AdvertisementsSection />
+        </View>
 
         <Label style={{ marginTop: 14 }}>Help</Label>
         <Row icon="book" title="How to play" onPress={() => setSheet('rules')} right={<Icon name="arrow" size={16} />} />

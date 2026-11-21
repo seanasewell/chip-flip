@@ -8,6 +8,7 @@ import { useSyncExternalStore } from 'react';
 import { kv } from './kv';
 import { progress } from './progress';
 import { linkProvider, signInWithProvider, type Provider, type SocialResult } from './social';
+import { purchases } from './purchases';
 import { supabase, supabaseConfigured } from './supabase';
 
 export interface Profile {
@@ -252,6 +253,7 @@ export const profile = {
     if (!state.provider) return;
     await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
     clearLocal();
+    purchases.forget();
     set({ online: 'off', userId: null, provider: null, email: null });
   },
   /** Deletes the server account and everything on this device. */
@@ -263,6 +265,7 @@ export const profile = {
     }
     progress.reset();
     clearLocal();
+    purchases.forget();
     set({ online: 'off', userId: null, provider: null, email: null });
     return true;
   },

@@ -13,6 +13,7 @@ import { LevelBadge } from './LevelBadge';
 import { Wordmark } from './Logo';
 import { Marquee } from './Marquee';
 import { fadeUp } from './motion';
+import { RemoveAdsCard } from './RemoveAds';
 import { ChallengeSection } from './Rewards';
 import { MODE_COPY } from './Setup';
 import { C, F, applySideColors, sideColor } from './theme';
@@ -76,6 +77,10 @@ export function Home({ onMode, onLevel }: { onMode: (m: GameModeId) => void; onL
 
           <View style={{ marginTop: 8 }}>
             <ChallengeSection title="Daily challenges" set={p.daily} defs={DAILY} bonus={DAILY_BONUS} resets={nextDay()} />
+          </View>
+
+          <View style={{ marginTop: 12 }}>
+            <RemoveAdsCard />
           </View>
         </View>
       </ScrollView>

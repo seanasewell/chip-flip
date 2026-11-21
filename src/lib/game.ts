@@ -15,6 +15,7 @@ import { gameMusic, haptic, resultsMusic, sfx } from '@/ui/sound';
 import { SIDE_COLORS, validColors } from '@/ui/theme';
 import { kv } from './kv';
 import { profile } from './profile';
+import { ads } from './ads';
 import { progress, type MatchSummary } from './progress';
 import { START_RATING, RATING_FLOOR, nextRating, opponentRating, ratingToSkill } from './skill';
 
@@ -556,6 +557,8 @@ class GameController {
     if (!s || s.recorded || s.match.phase !== 'over') return;
     s.recorded = true;
     this.persist();
+    // Every finished match counts toward the next ad, casual ones too.
+    ads.gameCompleted(s.match.id);
     if (s.config.casual) return;
     const m = s.match;
     const you = m.seats.find((x) => x.kind === 'you')!;

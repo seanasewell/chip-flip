@@ -7,7 +7,10 @@ import type { GameModeId } from '@/core/types';
 import { useGame } from '@/lib/game';
 import { progress } from '@/lib/progress';
 import { useProfile } from '@/lib/profile';
+import { ads } from '@/lib/ads';
+import { purchases } from '@/lib/purchases';
 import { Friends } from './Friends';
+import { SimulatedAdHost } from './RemoveAds';
 import { GameScreen } from './GameScreen';
 import { Home } from './Home';
 import { Profile, Settings } from './Profile';
@@ -34,6 +37,8 @@ export function ChipFlipApp() {
   const [lastUid, setLastUid] = useState(uid);
   if (uid !== lastUid) {
     setLastUid(uid);
+    // Remove ads follows the player (checked with the store, or simulated in Expo Go).
+    void purchases.start(uid).then(() => ads.warmUp());
     setTab('play');
     setPage(null);
   }
@@ -95,6 +100,7 @@ export function ChipFlipApp() {
         {screen}
       </Animated.View>
       {tabs && profile && <TutorialGate playerId={profile.id} onPlay={() => setPage({ name: 'setup', mode: 'h2h' })} />}
+      <SimulatedAdHost />
       {tabs && (
         <TabBar
           tab={tab}

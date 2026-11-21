@@ -8,6 +8,7 @@ import type { Seat } from '@/core/types';
 import { game, useGame } from '@/lib/game';
 import { levelOf, progress } from '@/lib/progress';
 import { useEffect, useState } from 'react';
+import { ads } from '@/lib/ads';
 import { Celebration } from './Celebration';
 import { LevelBadge } from './LevelBadge';
 import { Odometer } from './Odometer';
@@ -168,8 +169,8 @@ export function Results() {
               onPress={() => Share.share({ message: `I just won a ${MODES[m.mode].name.toLowerCase()} match of Chip Flip${two ? ` ${seq(you.side)}–${seq(1 - you.side)}` : ''} 🏆 Think you can flip more chips than me?` }).catch(() => {})}
             />
           )}
-          <Button title="Play again" icon="arrow" onPress={() => game.playAgain()} />
-          <Button title="Back to Play" variant="ghost" onPress={() => game.exit()} />
+          <Button title="Play again" icon="arrow" onPress={() => void ads.maybeShow().finally(() => game.playAgain())} />
+          <Button title="Back to Play" variant="ghost" onPress={() => void ads.maybeShow().finally(() => game.exit())} />
         </View>
       </View>
       {!casual && earned && <Celebration earned={earned} />}
